@@ -12,6 +12,7 @@ setup(
     author_email = 'dan-code@erase.net',
     url = 'https://github.com/TheLongplayerTrust/longplayer-python',
     packages = ['longplayer'],
+    scripts = ['bin/longplayer'],
     install_requires = ['soundfile', 'sounddevice', 'samplerate'],
     keywords = ('sound', 'music'),
     classifiers = [

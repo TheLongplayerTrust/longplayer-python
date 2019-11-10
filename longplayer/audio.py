@@ -18,9 +18,12 @@ class AudioPlayerVarispeed(object):
         self.audio_data = audio_data
         self.phase = int(initial_phase)
         self.rate = rate
-        self.resampler = samplerate.Resampler('sinc_best', channels=1)
         self.buffer = np.ndarray((0,))
+        self.resampler = samplerate.Resampler('sinc_best', channels=1)
 
+        #---------------------------------------------------------------------------------------------------------------
+        # Amplitude target/steps, used for volume fades when starting/ending playback.
+        #---------------------------------------------------------------------------------------------------------------
         self.amplitude_level = 0
         self.amplitude_target = 0
         self.amplitude_steps_remaining = 0
@@ -59,6 +62,12 @@ class AudioPlayerVarispeed(object):
         Returns:
               numpy.ndarray: A 1-dimensional numpy array of exactly `sample_count` floating-point samples.
         """
+
+        #---------------------------------------------------------------------------------------------------------------
+        # Generate output samples.
+        # Because resampling may generate too few samples for the required output block size, maintain an internal
+        # buffer of samples and refill it as needed.
+        #---------------------------------------------------------------------------------------------------------------
         while len(self.buffer) < sample_count:
             input_block = self.audio_data[self.phase:self.phase + sample_count]
             resampled_block = self.resampler.process(input_block, 1 / self.rate, end_of_input=False)
@@ -68,6 +77,9 @@ class AudioPlayerVarispeed(object):
         rv = self.buffer[:sample_count]
         self.buffer = self.buffer[sample_count:]
 
+        #---------------------------------------------------------------------------------------------------------------
+        # Generate amplitude envelope, and perform linear fading between amplitudes.
+        #---------------------------------------------------------------------------------------------------------------
         amp_envelope = np.full(sample_count, self.amplitude_level)
         if self.amplitude_steps_remaining > 0:
             for n in range(sample_count):
@@ -75,6 +87,8 @@ class AudioPlayerVarispeed(object):
                     self.amplitude_level += self.amplitude_step
                     self.amplitude_steps_remaining -= 1
                 amp_envelope[n] = self.amplitude_level
+        else:
+            self.amplitude_level = self.amplitude_target
         rv *= amp_envelope
 
         return rv

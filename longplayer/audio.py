@@ -19,7 +19,7 @@ class AudioPlayerVarispeed(object):
         self.phase = int(initial_phase)
         self.rate = rate
         self.buffer = np.ndarray((0,))
-        self.resampler = samplerate.Resampler('sinc_best', channels=1)
+        self.resampler = samplerate.Resampler('sinc_fastest', channels=1)
 
         #---------------------------------------------------------------------------------------------------------------
         # Amplitude target/steps, used for volume fades when starting/ending playback.

@@ -6,13 +6,14 @@ import logging
 
 parser = argparse.ArgumentParser(description="Longplayer command-line application")
 parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
+parser.add_argument("-s", "--score", action="store_true", help="show score")
 args = parser.parse_args()
 
 if args.verbose:
     logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
 try:
-    longplayer = Longplayer()
+    longplayer = Longplayer(render_score=args.score)
     longplayer.start()
 except KeyboardInterrupt:
     pass

@@ -10,6 +10,7 @@ For more information about Longplayer, read an [overview of the piece](https://l
 
 - Python 3
 - A Linux or macOS system with audio output
+- The Longplayer audio file (20-20.wav)
 
 ## Installation
 
@@ -20,13 +21,13 @@ The `libsamplerate` library is required for audio playback.
 To install Longplayer, clone this repository and run:
 
 ```
-pip install .
+pip3 install .
 ```
 
 ## Usage
 
-To run Longplayer, run:
+To run Longplayer from within the repository directory, you must first copy the Longplayer audio file `20-20.wav` to the `audio` directory. Then, run:
 
 ```
-longplayer
+bin/longplayer
 ```

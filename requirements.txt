@@ -1,0 +1,4 @@
+soundfile
+sounddevice
+samplerate
+numpy

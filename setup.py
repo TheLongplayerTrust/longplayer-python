@@ -13,7 +13,12 @@ setup(
     url = 'https://github.com/TheLongplayerTrust/longplayer-python',
     packages = ['longplayer'],
     scripts = ['bin/longplayer'],
-    install_requires = ['numpy', 'soundfile', 'sounddevice', 'samplerate'],
+    install_requires = [
+        'numpy',
+        'soundfile',
+        'sounddevice',
+        'samplerate @ git+https://github.com/tuxu/python-samplerate.git@pybind11-refactor#egg=samplerate'
+    ],
     keywords = ('sound', 'music'),
     classifiers = [
         'Topic :: Multimedia :: Sound/Audio',

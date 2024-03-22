@@ -10,6 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class Longplayer:
+    # def __init__(self):
+    #     self.output_stream = sounddevice.OutputStream(channels=1, blocksize=BLOCK_SIZE)
+
     def start(self):
         """
         Begin playback using the default system audio output device, based on the system's current timestamp.
@@ -56,7 +59,10 @@ class Longplayer:
 
             if last_increments_int is None or increments_int > last_increments_int:
                 logger.info("-------------------------------------------------------------------------------------")
-                logger.info("Begun new increment, currently elapsed: %d" % increments_int)
+                if last_increments_int is None:
+                    logger.info("Current increment index: %d" % (increments_int))
+                else:
+                    logger.info("Beginning new increment, new increment index: %d" % (increments_int + 1))
 
                 for audio_player in audio_players:
                     audio_player.fade_down()
@@ -69,7 +75,7 @@ class Longplayer:
                     position_samples = position * SAMPLE_RATE
                     audio_players.append(AudioPlayerVarispeed(AUDIO_DATA, offset_samples + position_samples, rate))
 
-            last_increments_int = increments_int
+                last_increments_int = increments_int
 
             output = np.zeros(BLOCK_SIZE)
             for channel_index, audio_player in enumerate(audio_players):

@@ -9,7 +9,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-class Longplayer(object):
+class Longplayer:
     def start(self):
         """
         Begin playback using the default system audio output device, based on the system's current timestamp.
@@ -72,7 +72,7 @@ class Longplayer(object):
             last_increments_int = increments_int
 
             output = np.zeros(BLOCK_SIZE)
-            for audio_player in audio_players:
+            for channel_index, audio_player in enumerate(audio_players):
                 channel_samples = audio_player.get_samples(BLOCK_SIZE)
                 output = output + channel_samples
                 if audio_player.amplitude_level == 0.0:

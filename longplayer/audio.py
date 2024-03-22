@@ -4,7 +4,7 @@ import numpy as np
 from .constants import SAMPLE_RATE, AUDIO_FADE_TIME
 
 
-class AudioPlayerVarispeed(object):
+class AudioPlayerVarispeed:
     def __init__(self, audio_data, initial_phase, rate):
         """
         Variable speed sample player. Resamples input audio in real-time
@@ -80,6 +80,7 @@ class AudioPlayerVarispeed(object):
         #---------------------------------------------------------------------------------------------------------------
         # Generate amplitude envelope, and perform linear fading between amplitudes.
         #---------------------------------------------------------------------------------------------------------------
+        # amp_envelope = np.full(sample_count, self.amplitude_target)
         amp_envelope = np.full(sample_count, self.amplitude_level)
         if self.amplitude_steps_remaining > 0:
             for n in range(sample_count):

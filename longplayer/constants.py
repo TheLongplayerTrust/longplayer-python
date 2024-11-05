@@ -3,7 +3,7 @@ import soundfile
 #-----------------------------------------------------------------------------------------------------------------------
 # Initialise audio file.
 #-----------------------------------------------------------------------------------------------------------------------
-AUDIO_PATH = "audio/20-20.wav"
+AUDIO_PATH = "audio/20-20.aif"
 
 audio_fd = soundfile.SoundFile(AUDIO_PATH)
 SAMPLE_RATE = audio_fd.samplerate
@@ -12,7 +12,7 @@ AUDIO_DATA = audio_fd.read()
 #-----------------------------------------------------------------------------------------------------------------------
 # Audio I/O block size, for output to audio hardware.
 #-----------------------------------------------------------------------------------------------------------------------
-BLOCK_SIZE = 4096
+BLOCK_SIZE = 512
 
 #-----------------------------------------------------------------------------------------------------------------------
 # The duration of the Longplayer audio basis is precisely 1220 seconds long.
@@ -20,7 +20,7 @@ BLOCK_SIZE = 4096
 # to loop seamlessly when segments reach the end of the audio.
 #-----------------------------------------------------------------------------------------------------------------------
 AUDIO_DURATION = 1220.0
-AUDIO_DURATION_SAMPLES = AUDIO_DURATION * SAMPLE_RATE
+AUDIO_DURATION_SAMPLES = int(AUDIO_DURATION * SAMPLE_RATE)
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Each playback segment is precisely 2 minutes.
@@ -30,7 +30,7 @@ INCREMENT_INTERVAL = 120.0
 #-----------------------------------------------------------------------------------------------------------------------
 # Duration for audio fades, at startup and between segments.
 #-----------------------------------------------------------------------------------------------------------------------
-AUDIO_FADE_TIME = 3.0
+AUDIO_FADE_TIME = 5.0
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Channels are numbered from the inside (highest frequency) to the outside (lowest frequency).
@@ -48,3 +48,4 @@ CHANNEL_INCREMENT_SAMPLES = [
     11146.05344934740,
     2593.175981469840
 ]
+

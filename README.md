@@ -14,9 +14,10 @@ For more information about Longplayer, read an [overview of the piece](https://l
 
 ## Installation
 
-The `libsamplerate` library is required for audio playback.
+The `libsamplerate` and `portaudio` libraries are required for audio playback.
 
 * On macOS: `brew install libsamplerate`
+* On Raspberry Pi: `sudo apt install libportaudio2`
 
 To install Longplayer, clone this repository and run:
 

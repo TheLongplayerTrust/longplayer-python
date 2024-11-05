@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class Longplayer:
-    def __init__(self):
+    def __init__(self, gain: float = -12.0):
         self.output_stream = sounddevice.OutputStream(samplerate=SAMPLE_RATE,
                                                       channels=2,
                                                       blocksize=BLOCK_SIZE,
@@ -19,6 +19,7 @@ class Longplayer:
         self.audio_players: list[AudioPlayer] = []
         self.output_left = np.zeros(BLOCK_SIZE)
         self.output_right = np.zeros(BLOCK_SIZE)
+        self.gain_linear = 10.0 ** (gain / 20)
 
     def audio_callback(self, outdata, num_frames, time, status):
         self.output_left[:] = 0
@@ -30,8 +31,8 @@ class Longplayer:
                 self.output_left += channel_samples * (1 - np.sqrt(pan)) / len(self.audio_players)
                 self.output_right += channel_samples * (np.sqrt(pan)) / len(self.audio_players)
 
-        outdata[:,0] = self.output_left
-        outdata[:,1] = self.output_right
+        outdata[:,0] = self.output_left * self.gain_linear
+        outdata[:,1] = self.output_right * self.gain_linear
 
     def start(self):
         """

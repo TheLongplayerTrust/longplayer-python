@@ -3,7 +3,7 @@ import soundfile
 #-----------------------------------------------------------------------------------------------------------------------
 # Initialise audio file.
 #-----------------------------------------------------------------------------------------------------------------------
-AUDIO_PATH = "audio/20-20.wav"
+AUDIO_PATH = "audio/20-20.aif"
 
 audio_fd = soundfile.SoundFile(AUDIO_PATH)
 SAMPLE_RATE = audio_fd.samplerate

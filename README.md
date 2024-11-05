@@ -27,7 +27,7 @@ pip3 install .
 
 ## Usage
 
-To run Longplayer from within the repository directory, you must first copy the Longplayer audio file `20-20.wav` to the `audio` directory. Then, run:
+To run Longplayer from within the repository directory, you must first copy the Longplayer audio file [20-20.aif](https://longplayer.org/audio/20-20.aif.zip) to the `audio` directory. Then, run:
 
 ```
 bin/longplayer

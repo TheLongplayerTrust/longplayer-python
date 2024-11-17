@@ -13,10 +13,7 @@ For more information about Longplayer, read an [overview of the piece](https://l
 
 ## Installation
 
-The `libsamplerate` and `portaudio` libraries are required for audio playback.
-
-* On macOS: `brew install libsamplerate`
-* On Raspberry Pi: `sudo apt install libportaudio2`
+On Linux (including Raspberry Pi), the `portaudio` library must be installed: `sudo apt install libportaudio2`
 
 To install Longplayer from the command line:
 
@@ -26,7 +23,7 @@ pip3 install longplayer
 
 ## Usage
 
-To run Longplayer from the command line:
+To run Longplayer from the command line, run:
 
 ```
 longplayer

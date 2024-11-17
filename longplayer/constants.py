@@ -1,9 +1,11 @@
+import os
 import soundfile
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Initialise audio file.
 #-----------------------------------------------------------------------------------------------------------------------
-AUDIO_PATH = "audio/20-20.aif"
+AUDIO_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audio")
+AUDIO_PATH = os.path.join(AUDIO_DIR, "20-20.aif")
 
 audio_fd = soundfile.SoundFile(AUDIO_PATH)
 SAMPLE_RATE = audio_fd.samplerate

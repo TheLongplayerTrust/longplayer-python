@@ -26,5 +26,9 @@ setup(
         'Topic :: Communications',
         'Development Status :: 4 - Beta',
         'Intended Audience :: End Users/Desktop'
-    ]
+    ],
+    package_data={
+        'longplayer': ['audio/20-20.aif']
+    },
+    include_package_data=True,
 )

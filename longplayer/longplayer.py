@@ -13,6 +13,24 @@ logger = logging.getLogger(__name__)
 
 class Longplayer:
     def __init__(self, num_channels: int = 2, gain: float = -6.0):
+        """
+        Longplayer composition logic.
+
+        Connects to the system's default audio output device,
+        creates a mono sample player for each layer of audio,
+        and performs the timing logic of stepping forwards through increments.
+
+        Args:
+            num_channels (int, optional): Number of audio output channels. Can be 1, 2 or 6.
+                                          When 1, output is a mono mix.
+                                          When 2, output is spread across a stereo field.
+                                          When 6, output is separated into 6 individual channels.
+                                          Defaults to 2.
+            gain (float, optional): Output gain, in decibels. Defaults to -6.0.
+
+        Raises:
+            ValueError: _description_
+        """
         self.num_channels = num_channels
         if num_channels not in (1, 2, 6):
             raise ValueError("Invalid number of channels: %d (must be one of 1, 2, 6)" % num_channels)
@@ -33,11 +51,11 @@ class Longplayer:
             for channel_index, audio_player in enumerate(self.audio_players):
                 channel_samples = audio_player.get_samples(num_frames)
                 if self.num_channels == 1:
-                    self.output_block[0] += channel_samples / len(self.audio_players)
+                    self.output_block[0] += channel_samples / self.num_channels
                 elif self.num_channels == 2:
-                    pan = channel_index / 5
-                    self.output_block[0] += channel_samples * (1 - np.sqrt(pan)) / len(self.audio_players)
-                    self.output_block[1] += channel_samples * (np.sqrt(pan)) / len(self.audio_players)
+                    pan = (channel_index % 6) / 5
+                    self.output_block[0] += channel_samples * (1 - np.sqrt(pan)) / self.num_channels
+                    self.output_block[1] += channel_samples * (np.sqrt(pan)) / self.num_channels
                 elif self.num_channels == 6:
                     self.output_block[channel_index, :] = channel_samples
 
@@ -56,15 +74,18 @@ class Longplayer:
         hours = timedelta.seconds // 3600
         minutes = (timedelta.seconds - hours * 3600) // 60
         seconds = timedelta.seconds % 60
-        print("Longplayer has been running for %d years, %d days, %d hours, %d minutes, %d seconds." % (years, days, hours, minutes, seconds))
+        logger.info("Longplayer has been running for %d years, %d days, %d hours, %d minutes, %d seconds." % (years, days, hours, minutes, seconds))
 
         increments = get_total_increments_elapsed()
-        logger.info("-------------------------------------------------------------------------------------")
-        logger.info("Total increments elapsed: %f" % increments)
+        logger.debug("-------------------------------------------------------------------------------------")
+        logger.debug("Total increments elapsed: %f" % increments)
 
     def run(self):
-        print("Longplayer, by Jem Finer.")
+        """
+        Begin playback. Blocks indefinitely.
+        """
 
+        logger.info("Longplayer, by Jem Finer.")
         self.print_run_time()
 
         #---------------------------------------------------------------------------------------------------------------
@@ -88,18 +109,18 @@ class Longplayer:
             increments_int = int(increments)
 
             if last_increments_int is None or increments_int > last_increments_int:
-                logger.info("-------------------------------------------------------------------------------------")
+                logger.debug("-------------------------------------------------------------------------------------")
                 if last_increments_int is None:
-                    logger.info("Current increment index: %d" % (increments_int))
+                    logger.debug("Current increment index: %d" % (increments_int))
                 else:
-                    logger.info("Beginning new increment, new increment index: %d" % (increments_int))
+                    logger.debug("Beginning new increment, new increment index: %d" % (increments_int))
 
                 for audio_player in self.audio_players:
                     audio_player.fade_down()
 
                 for channel_index, rate in enumerate(CHANNEL_RATES):
                     offset, position = get_offset_for_channel(increments, channel_index)
-                    logger.info(" - channel %d: offset %.3fs, position %.3fs" % (channel_index, offset, position))
+                    logger.debug(" - channel %d: offset %.3fs, position %.3fs" % (channel_index, offset, position))
 
                     offset_samples = offset * SAMPLE_RATE
                     position_samples = position * SAMPLE_RATE

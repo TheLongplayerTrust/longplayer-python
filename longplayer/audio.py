@@ -53,15 +53,17 @@ class AudioPlayer:
     
     phase = property(get_phase, set_phase)
 
-    def fade_up(self):
-        self.fade_to(1.0)
+    def fade_up(self, duration: float = AUDIO_FADE_TIME):
+        self.fade_to(target=1.0,
+                     duration=duration)
 
-    def fade_down(self):
-        self.fade_to(0.0)
+    def fade_down(self, duration: float = AUDIO_FADE_TIME):
+        self.fade_to(target=0.0,
+                     duration=duration)
 
-    def fade_to(self, target):
+    def fade_to(self, target: float, duration: float):
         self.amplitude_target = target
-        self.amplitude_steps_remaining = AUDIO_FADE_TIME * SAMPLE_RATE
+        self.amplitude_steps_remaining = duration * SAMPLE_RATE
         self.amplitude_step = (self.amplitude_target - self.amplitude_level) / self.amplitude_steps_remaining
 
     def get_samples(self, sample_count) -> np.ndarray:

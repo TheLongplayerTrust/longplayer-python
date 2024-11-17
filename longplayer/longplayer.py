@@ -4,6 +4,7 @@ from .constants import AUDIO_DATA, CHANNEL_RATES, SAMPLE_RATE, BLOCK_SIZE
 
 import time
 import logging
+import threading
 import sounddevice
 import numpy as np
 
@@ -11,35 +12,38 @@ logger = logging.getLogger(__name__)
 
 
 class Longplayer:
-    def __init__(self):
+    def __init__(self, num_channels: int = 2, gain: float = -6.0):
+        self.num_channels = num_channels
         self.output_stream = sounddevice.OutputStream(samplerate=SAMPLE_RATE,
-                                                      channels=2,
+                                                      channels=self.num_channels,
                                                       blocksize=BLOCK_SIZE,
                                                       callback=self.audio_callback)
         self.audio_players: list[AudioPlayer] = []
         self.output_left = np.zeros(BLOCK_SIZE)
         self.output_right = np.zeros(BLOCK_SIZE)
+        self.thread = None
+        self.gain_linear = 10 ** (gain / 20)
+        self.is_running = False
 
     def audio_callback(self, outdata, num_frames, time, status):
         self.output_left[:] = 0
         self.output_right[:] = 0
+
         if len(self.audio_players) > 0:
-            for channel_index, audio_player in enumerate(self.audio_players[:]):
+            for channel_index, audio_player in enumerate(self.audio_players):
                 channel_samples = audio_player.get_samples(num_frames)
-                pan = channel_index / 5
-                self.output_left += channel_samples * (1 - np.sqrt(pan)) / len(self.audio_players)
-                self.output_right += channel_samples * (np.sqrt(pan)) / len(self.audio_players)
-
-        outdata[:,0] = self.output_left
-        outdata[:,1] = self.output_right
-
-    def start(self):
-        """
-        Begin playback using the default system audio output device, based on the system's current timestamp.
-        """
-
-        print("Longplayer, by Jem Finer.")
-
+                if self.num_channels == 1:
+                    self.output_left += channel_samples / len(self.audio_players)
+                if self.num_channels == 2:
+                    pan = channel_index / 5
+                    self.output_left += channel_samples * (1 - np.sqrt(pan)) / len(self.audio_players)
+                    self.output_right += channel_samples * (np.sqrt(pan)) / len(self.audio_players)
+                
+        outdata[:,0] = self.output_left * self.gain_linear
+        if self.num_channels == 2:
+            outdata[:,1] = self.output_right * self.gain_linear
+    
+    def print_run_time(self):
         #--------------------------------------------------------------------------------
         # Calculate the number of units elapsed since the beginning of the piece,
         # for terminal display.
@@ -57,14 +61,20 @@ class Longplayer:
         logger.info("-------------------------------------------------------------------------------------")
         logger.info("Total increments elapsed: %f" % increments)
 
+    def run(self):
+        print("Longplayer, by Jem Finer.")
+
+        self.print_run_time()
+
         #---------------------------------------------------------------------------------------------------------------
         # Open the default sound output device.
         #---------------------------------------------------------------------------------------------------------------
         self.output_stream.start()
 
         last_increments_int = None
+        self.is_running = True
 
-        while True:
+        while self.is_running:
             #--------------------------------------------------------------------------------
             # Audio loop.
             #  - Check whether we are beginning a new segment. If so:
@@ -103,4 +113,18 @@ class Longplayer:
                 if audio_player.is_finished:
                     self.audio_players.remove(audio_player)
 
-            time.sleep(0.2)
+            time.sleep(0.1)
+
+        for audio_player in self.audio_players[:]:
+            audio_player.fade_down(0.2)
+
+    def start(self):
+        """
+        Begin playback using the default system audio output device, based on the system's current timestamp.
+        """
+
+        self.thread = threading.Thread(target=self.run, daemon=True)
+        self.thread.start()
+
+    def stop(self):
+        self.is_running = False

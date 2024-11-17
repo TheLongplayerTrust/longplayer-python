@@ -10,7 +10,6 @@ For more information about Longplayer, read an [overview of the piece](https://l
 
 - Python 3
 - A Linux or macOS system with audio output
-- The Longplayer audio file (20-20.wav)
 
 ## Installation
 
@@ -19,16 +18,18 @@ The `libsamplerate` and `portaudio` libraries are required for audio playback.
 * On macOS: `brew install libsamplerate`
 * On Raspberry Pi: `sudo apt install libportaudio2`
 
-To install Longplayer, clone this repository and run:
+To install Longplayer from the command line:
 
 ```
-pip3 install .
+pip3 install longplayer
 ```
 
 ## Usage
 
-To run Longplayer from within the repository directory, you must first copy the Longplayer audio file [20-20.aif](https://longplayer.org/audio/20-20.aif.zip) to the `audio` directory. Then, run:
+To run Longplayer from the command line:
 
 ```
-bin/longplayer
+longplayer
 ```
+
+Press Ctrl-C to stop playback.

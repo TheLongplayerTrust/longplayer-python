@@ -2,7 +2,7 @@ import datetime
 from .constants import INCREMENT_INTERVAL, CHANNEL_RATES, CHANNEL_INCREMENT_SAMPLES, SAMPLE_RATE, AUDIO_DURATION
 
 
-def get_total_time_elapsed():
+def get_total_time_elapsed() -> datetime.timedelta:
     """
     Calculate the total running time of Longplayer to date.
 
@@ -17,7 +17,7 @@ def get_total_time_elapsed():
     return current_time - start_time
 
 
-def get_total_increments_elapsed():
+def get_total_increments_elapsed() -> float:
     """
     Calculate the total number of two-minute increments elapsed to date.
 
@@ -29,7 +29,7 @@ def get_total_increments_elapsed():
     return increments_elapsed
 
 
-def get_offset_for_channel(increments, channel=0):
+def get_offset_for_channel(increments, channel: int = 0) -> tuple[float, float]:
     """
     For a given channel, calculate the position of the playback head given a specific number of elapsed increments.
     Each segment moves forward every 120 seconds, at a rate specific to each channel.

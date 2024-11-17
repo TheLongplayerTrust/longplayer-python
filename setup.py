@@ -17,9 +17,9 @@ setup(
         'numpy',
         'soundfile',
         'sounddevice',
-        'samplerate @ git+https://github.com/tuxu/python-samplerate.git@pybind11-refactor#egg=samplerate'
+        'samplerate'
     ],
-    keywords = ('sound', 'music'),
+    keywords = ('sound', 'music', 'time', 'soundart'),
     classifiers = [
         'Topic :: Multimedia :: Sound/Audio',
         'Topic :: Artistic Software',

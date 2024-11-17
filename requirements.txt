@@ -1,4 +1,4 @@
 soundfile
 sounddevice
+samplerate
 numpy
-git+https://github.com/tuxu/python-samplerate.git@pybind11-refactor#egg=samplerate

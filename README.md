@@ -8,14 +8,14 @@ For more information about Longplayer, read an [overview of the piece](https://l
 
 ## Requirements
 
-- Python 3
+- Python 3.9 or above ([python.org](https://www.python.org/downloads/))
 - A Linux or macOS system with audio output
 
 ## Installation
 
-On Linux (including Raspberry Pi), the `portaudio` library must be installed: `sudo apt install libportaudio2`
+If you're using Linux (including Raspberry Pi), you will need to install the `portaudio` library for audio output: `sudo apt install libportaudio2`
 
-To install Longplayer from the command line:
+To install Longplayer from the command line, for any platform, open up a terminal session and enter:
 
 ```
 pip3 install longplayer

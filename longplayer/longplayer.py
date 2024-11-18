@@ -1,6 +1,7 @@
 from .time import get_total_time_elapsed, get_total_increments_elapsed, get_offset_for_channel
 from .audio import AudioPlayer
 from .constants import AUDIO_DATA, CHANNEL_RATES, SAMPLE_RATE, DEFAULT_BUFFER_SIZE, DEFAULT_AUDIO_GAIN
+from typing import Optional
 
 import math
 import time
@@ -15,7 +16,8 @@ class Longplayer:
     def __init__(self,
                  num_channels: int = 2,
                  buffer_size: int = DEFAULT_BUFFER_SIZE,
-                 gain: float = DEFAULT_AUDIO_GAIN):
+                 gain: float = DEFAULT_AUDIO_GAIN,
+                 solo: Optional[int] = None):
         """
         Longplayer composition logic.
 
@@ -29,13 +31,19 @@ class Longplayer:
                                           When 2, output is spread across a stereo field.
                                           When 6, output is separated into 6 individual channels.
                                           Defaults to 2.
+            buffer_size (int): Length of audio output buffer, in samples.
             gain (float, optional): Output gain, in decibels. Defaults to -6.0.
+            solo (int, optional): If specified, solo a particular layer number, from 0 to 5.
 
         Raises:
             ValueError: _description_
         """
         self.num_channels = num_channels
         self.buffer_size = buffer_size
+        self.solo = solo
+        if self.solo not in [0, 1, 2, 3, 4, 5, None]:
+            raise ValueError("Invalid value for solo (must be within 0..5)")
+
         if num_channels not in (1, 2, 6):
             raise ValueError("Invalid number of channels: %d (must be one of 1, 2, 6)" % num_channels)
         self.output_stream = sounddevice.OutputStream(samplerate=SAMPLE_RATE,
@@ -47,20 +55,25 @@ class Longplayer:
         self.thread = None
         self.gain_linear = 10 ** (gain / 20)
         self.is_running = False
-
+        
     def audio_callback(self, outdata, num_frames, time, status):
         for channel in range(self.num_channels):
             for frame in range(num_frames):
                 self.output_block[channel][frame] = 0
 
         if len(self.audio_players) > 0:
-            for channel_index, audio_player in enumerate(self.audio_players):
+            for player_index, audio_player in enumerate(self.audio_players):
+                channel_index = player_index % 6
+
+                if self.solo is not None and self.solo != channel_index:
+                    continue
+
                 channel_samples = audio_player.get_samples(num_frames)
                 if self.num_channels == 1:
                     for frame in range(num_frames):
                         self.output_block[0][frame] += channel_samples[frame] / self.num_channels
                 elif self.num_channels == 2:
-                    pan = (channel_index % 6) / 5
+                    pan = channel_index / 5
                     for frame in range(num_frames):
                         self.output_block[0][frame] += channel_samples[frame] * (1 - math.sqrt(pan)) / self.num_channels
                         self.output_block[1][frame] += channel_samples[frame] * (math.sqrt(pan)) / self.num_channels

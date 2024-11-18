@@ -17,7 +17,6 @@ setup(
         'numpy',
         'soundfile',
         'sounddevice',
-        'samplerate'
     ],
     keywords = ('sound', 'music', 'time', 'soundart'),
     classifiers = [

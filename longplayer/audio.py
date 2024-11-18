@@ -3,6 +3,33 @@ import numpy as np
 
 from .constants import SAMPLE_RATE, AUDIO_FADE_TIME, AUDIO_DURATION_SAMPLES
 
+class Resampler:
+    def __init__(self):
+        """
+        Resampler with linear interpolation.
+        """
+        self.phase = 0.0
+        self.buffer = np.array([])
+
+    def process(self, samples: np.ndarray, ratio: float):
+        """
+        Resample a block of samples.
+        
+        Args:
+            audio_data (np.ndarray): 1D array of floating-point samples
+            ratio (float): Resampling ratio
+        """
+        output = []
+        while self.phase < len(samples) - 1:
+            phase_int = int(self.phase)
+            phase_frac = self.phase - phase_int
+            s0 = samples[phase_int]
+            s1 = samples[phase_int + 1]
+            sample = (s1 * phase_frac) + (s0 * (1 - phase_frac))
+            output.append(sample)
+            self.phase += ratio
+        self.phase -= len(samples) - 1
+        return np.array(output)
 
 class AudioPlayer:
     def __init__(self, audio_data, initial_phase, rate):
@@ -19,7 +46,7 @@ class AudioPlayer:
         self._phase = int(initial_phase)
         self.rate = rate
         self.buffer = np.ndarray((0,))
-        self.resampler = samplerate.Resampler('sinc_fastest', channels=1)
+        self.resampler = Resampler()
 
         #--------------------------------------------------------------------------------
         # Amplitude target/steps, used for volume fades when starting/ending playback.
@@ -81,7 +108,8 @@ class AudioPlayer:
         #--------------------------------------------------------------------------------
         while len(self.buffer) < sample_count:
             input_block = self.audio_data[self.phase:self.phase + sample_count]
-            resampled_block = self.resampler.process(input_block, 1 / self.rate, end_of_input=False)
+            # resampled_block = self.resampler.process(input_block, 1 / self.rate, end_of_input=False)
+            resampled_block = self.resampler.process(input_block, self.rate)
             self.buffer = np.concatenate((self.buffer, resampled_block))
             self.phase = self.phase + sample_count
 

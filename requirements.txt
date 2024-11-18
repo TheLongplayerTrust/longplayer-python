@@ -1,4 +1,3 @@
-soundfile
 sounddevice
-samplerate
+soundfile
 numpy

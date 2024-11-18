@@ -26,7 +26,7 @@ pip3 install longplayer
 To run Longplayer from the command line, run:
 
 ```
-longplayer
+python3 -m longplayer
 ```
 
 Press Ctrl-C to stop playback.

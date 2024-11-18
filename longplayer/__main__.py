@@ -1,5 +1,3 @@
-#!/usr/bin/env python3 
-
 from longplayer import Longplayer, DEFAULT_AUDIO_GAIN
 import argparse
 import logging

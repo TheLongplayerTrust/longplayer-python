@@ -1,5 +1,4 @@
-import samplerate
-import numpy as np
+import math
 
 from .constants import SAMPLE_RATE, AUDIO_FADE_TIME, AUDIO_DURATION_SAMPLES
 
@@ -9,14 +8,14 @@ class Resampler:
         Resampler with linear interpolation.
         """
         self.phase = 0.0
-        self.buffer = np.array([])
+        self.buffer = []
 
-    def process(self, samples: np.ndarray, ratio: float):
+    def process(self, samples: list, ratio: float):
         """
         Resample a block of samples.
         
         Args:
-            audio_data (np.ndarray): 1D array of floating-point samples
+            audio_data (list): 1D array of floating-point samples
             ratio (float): Resampling ratio
         """
         output = []
@@ -29,23 +28,23 @@ class Resampler:
             output.append(sample)
             self.phase += ratio
         self.phase -= len(samples) - 1
-        return np.array(output)
+        return output
 
 class AudioPlayer:
     def __init__(self, audio_data, initial_phase, rate):
         """
         Variable speed sample player. Resamples input audio in real-time
-        using libsamplerate's sinc resampler.
+        with linear interpolation.
 
         Args:
-            audio_data (np.ndarray): 1D array of floating-point samples
+            audio_data (list): 1D array of floating-point samples
             initial_phase (int): Initial phase in samples
             rate (float): Playback rate
         """
         self.audio_data = audio_data
         self._phase = int(initial_phase)
         self.rate = rate
-        self.buffer = np.ndarray((0,))
+        self.buffer = list((0,))
         self.resampler = Resampler()
 
         #--------------------------------------------------------------------------------
@@ -93,12 +92,12 @@ class AudioPlayer:
         self.amplitude_steps_remaining = duration * SAMPLE_RATE
         self.amplitude_step = (self.amplitude_target - self.amplitude_level) / self.amplitude_steps_remaining
 
-    def get_samples(self, sample_count) -> np.ndarray:
+    def get_samples(self, sample_count) -> list:
         """
         Returns `sample_count` samples, resampled to the new rate.
 
         Returns:
-              numpy.ndarray: A 1-dimensional numpy array of exactly `sample_count` floating-point samples.
+              list: A 1-dimensional array of exactly `sample_count` floating-point samples.
         """
 
         #--------------------------------------------------------------------------------
@@ -108,9 +107,8 @@ class AudioPlayer:
         #--------------------------------------------------------------------------------
         while len(self.buffer) < sample_count:
             input_block = self.audio_data[self.phase:self.phase + sample_count]
-            # resampled_block = self.resampler.process(input_block, 1 / self.rate, end_of_input=False)
             resampled_block = self.resampler.process(input_block, self.rate)
-            self.buffer = np.concatenate((self.buffer, resampled_block))
+            self.buffer = self.buffer + resampled_block
             self.phase = self.phase + sample_count
 
         rv = self.buffer[:sample_count]
@@ -119,7 +117,7 @@ class AudioPlayer:
         #--------------------------------------------------------------------------------
         # Generate amplitude envelope, and perform linear fading between amplitudes.
         #--------------------------------------------------------------------------------
-        amp_envelope = np.full(sample_count, self.amplitude_level)
+        amp_envelope = [self.amplitude_level] * sample_count
         for n in range(sample_count):
             if self.amplitude_steps_remaining > 0:
                 self.amplitude_level += self.amplitude_step
@@ -128,8 +126,9 @@ class AudioPlayer:
                     self.amplitude_level = self.amplitude_target
                     if self.amplitude_level == 0.0:
                         self.is_finished = True
-            amp_envelope[n] = self.amplitude_level
+            amp_envelope[n] = math.sqrt(self.amplitude_level)
 
-        rv *= np.sqrt(amp_envelope)
+        for n in range(sample_count):
+            rv[n] *= amp_envelope[n]
 
         return rv

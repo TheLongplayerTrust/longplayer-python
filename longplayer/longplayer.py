@@ -2,11 +2,11 @@ from .time import get_total_time_elapsed, get_total_increments_elapsed, get_offs
 from .audio import AudioPlayer
 from .constants import AUDIO_DATA, CHANNEL_RATES, SAMPLE_RATE, BLOCK_SIZE
 
+import math
 import time
 import logging
 import threading
 import sounddevice
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -39,28 +39,34 @@ class Longplayer:
                                                       blocksize=BLOCK_SIZE,
                                                       callback=self.audio_callback)
         self.audio_players: list[AudioPlayer] = []
-        self.output_block = np.zeros((self.num_channels, BLOCK_SIZE))
+        self.output_block = [[0] * BLOCK_SIZE for channel in range(self.num_channels)]
         self.thread = None
         self.gain_linear = 10 ** (gain / 20)
         self.is_running = False
 
     def audio_callback(self, outdata, num_frames, time, status):
-        self.output_block[:] = 0
+        for channel in range(self.num_channels):
+            for frame in range(num_frames):
+                self.output_block[channel][frame] = 0
 
         if len(self.audio_players) > 0:
             for channel_index, audio_player in enumerate(self.audio_players):
                 channel_samples = audio_player.get_samples(num_frames)
                 if self.num_channels == 1:
-                    self.output_block[0] += channel_samples / self.num_channels
+                    for frame in range(num_frames):
+                        self.output_block[0][frame] += channel_samples[frame] / self.num_channels
                 elif self.num_channels == 2:
                     pan = (channel_index % 6) / 5
-                    self.output_block[0] += channel_samples * (1 - np.sqrt(pan)) / self.num_channels
-                    self.output_block[1] += channel_samples * (np.sqrt(pan)) / self.num_channels
+                    for frame in range(num_frames):
+                        self.output_block[0][frame] += channel_samples[frame] * (1 - math.sqrt(pan)) / self.num_channels
+                        self.output_block[1][frame] += channel_samples[frame] * (math.sqrt(pan)) / self.num_channels
                 elif self.num_channels == 6:
-                    self.output_block[channel_index, :] = channel_samples
+                    for frame in range(num_frames):
+                        self.output_block[channel_index][frame] = channel_samples[frame]
 
         for channel in range(self.num_channels):
-            outdata[:,channel] = self.output_block[channel] * self.gain_linear
+            for frame in range(num_frames):
+                outdata[frame][channel] = self.output_block[channel][frame] * self.gain_linear
     
     def print_run_time(self):
         #--------------------------------------------------------------------------------

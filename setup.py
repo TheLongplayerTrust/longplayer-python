@@ -14,7 +14,6 @@ setup(
     packages = ['longplayer'],
     scripts = ['bin/longplayer'],
     install_requires = [
-        'numpy',
         'soundfile',
         'sounddevice',
     ],

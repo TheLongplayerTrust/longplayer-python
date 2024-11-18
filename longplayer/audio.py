@@ -18,17 +18,20 @@ class Resampler:
             audio_data (list): 1D array of floating-point samples
             ratio (float): Resampling ratio
         """
-        output = []
+        buffer = []
+        samples = list(samples)
         while self.phase < len(samples) - 1:
             phase_int = int(self.phase)
             phase_frac = self.phase - phase_int
             s0 = samples[phase_int]
             s1 = samples[phase_int + 1]
             sample = (s1 * phase_frac) + (s0 * (1 - phase_frac))
-            output.append(sample)
+            buffer.append(sample)
             self.phase += ratio
+            # index += 1
         self.phase -= len(samples) - 1
-        return output
+        # self.buffer = []
+        return buffer
 
 class AudioPlayer:
     def __init__(self, audio_data, initial_phase, rate):
@@ -42,9 +45,9 @@ class AudioPlayer:
             rate (float): Playback rate
         """
         self.audio_data = audio_data
-        self._phase = int(initial_phase)
+        self._phase = initial_phase
         self.rate = rate
-        self.buffer = list((0,))
+        self.buffer = [0]
         self.resampler = Resampler()
 
         #--------------------------------------------------------------------------------

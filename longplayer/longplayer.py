@@ -1,6 +1,6 @@
 from .time import get_total_time_elapsed, get_total_increments_elapsed, get_offset_for_channel
 from .audio import AudioPlayer
-from .constants import AUDIO_DATA, CHANNEL_RATES, SAMPLE_RATE, BLOCK_SIZE
+from .constants import AUDIO_DATA, CHANNEL_RATES, SAMPLE_RATE, DEFAULT_BUFFER_SIZE, DEFAULT_AUDIO_GAIN
 
 import math
 import time
@@ -12,7 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class Longplayer:
-    def __init__(self, num_channels: int = 2, gain: float = -6.0):
+    def __init__(self,
+                 num_channels: int = 2,
+                 buffer_size: int = DEFAULT_BUFFER_SIZE,
+                 gain: float = DEFAULT_AUDIO_GAIN):
         """
         Longplayer composition logic.
 
@@ -32,14 +35,15 @@ class Longplayer:
             ValueError: _description_
         """
         self.num_channels = num_channels
+        self.buffer_size = buffer_size
         if num_channels not in (1, 2, 6):
             raise ValueError("Invalid number of channels: %d (must be one of 1, 2, 6)" % num_channels)
         self.output_stream = sounddevice.OutputStream(samplerate=SAMPLE_RATE,
                                                       channels=self.num_channels,
-                                                      blocksize=BLOCK_SIZE,
+                                                      blocksize=self.buffer_size,
                                                       callback=self.audio_callback)
         self.audio_players: list[AudioPlayer] = []
-        self.output_block = [[0] * BLOCK_SIZE for channel in range(self.num_channels)]
+        self.output_block = [[0] * buffer_size for channel in range(self.num_channels)]
         self.thread = None
         self.gain_linear = 10 ** (gain / 20)
         self.is_running = False
@@ -130,8 +134,9 @@ class Longplayer:
 
                     offset_samples = offset * SAMPLE_RATE
                     position_samples = position * SAMPLE_RATE
+                    initial_phase = int(offset_samples + position_samples)
                     player = AudioPlayer(audio_data=AUDIO_DATA,
-                                         initial_phase=offset_samples + position_samples,
+                                         initial_phase=initial_phase,
                                          rate=rate)
                     self.audio_players.append(player)
 

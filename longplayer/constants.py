@@ -12,9 +12,9 @@ SAMPLE_RATE = audio_fd.samplerate
 AUDIO_DATA = audio_fd.read()
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Audio I/O block size, for output to audio hardware.
+# Audio I/O buffer size, for output to audio hardware.
 #-----------------------------------------------------------------------------------------------------------------------
-BLOCK_SIZE = 1024
+DEFAULT_BUFFER_SIZE = 1024
 
 #-----------------------------------------------------------------------------------------------------------------------
 # The duration of the Longplayer audio basis is precisely 1220 seconds long.
@@ -37,7 +37,7 @@ AUDIO_FADE_TIME = 5.0
 #-----------------------------------------------------------------------------------------------------------------------
 # Default audio gain, in decibels
 #-----------------------------------------------------------------------------------------------------------------------
-DEFAULT_AUDIO_GAIN = -6.0
+DEFAULT_AUDIO_GAIN = -0.0
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Channels are numbered from the inside (highest frequency) to the outside (lowest frequency).

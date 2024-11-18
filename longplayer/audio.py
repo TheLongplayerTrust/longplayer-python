@@ -19,7 +19,7 @@ class Resampler:
             ratio (float): Resampling ratio
         """
         buffer = []
-        samples = list(samples)
+        samples = self.buffer + list(samples)
         while self.phase < len(samples) - 1:
             phase_int = int(self.phase)
             phase_frac = self.phase - phase_int
@@ -28,9 +28,8 @@ class Resampler:
             sample = (s1 * phase_frac) + (s0 * (1 - phase_frac))
             buffer.append(sample)
             self.phase += ratio
-            # index += 1
         self.phase -= len(samples) - 1
-        # self.buffer = []
+        self.buffer = [samples[-1]]
         return buffer
 
 class AudioPlayer:

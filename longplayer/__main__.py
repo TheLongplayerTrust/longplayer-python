@@ -15,6 +15,7 @@ def main(num_channels: int,
         while True:
             time.sleep(0.1)
     except KeyboardInterrupt:
+        print("\nExiting...")
         longplayer.stop()
         time.sleep(0.5)
 

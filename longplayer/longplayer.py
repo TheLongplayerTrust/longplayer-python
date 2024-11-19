@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class Longplayer:
     def __init__(self,
+                 output_device: int = None,
                  num_channels: int = 2,
                  buffer_size: int = DEFAULT_BUFFER_SIZE,
                  gain: float = DEFAULT_AUDIO_GAIN,
@@ -26,6 +27,8 @@ class Longplayer:
         and performs the timing logic of stepping forwards through increments.
 
         Args:
+            output_device (int, optional): Index of the audio output device to use.
+                                           If not specified, use the system default.
             num_channels (int, optional): Number of audio output channels. Can be 1, 2 or 6.
                                           When 1, output is a mono mix.
                                           When 2, output is spread across a stereo field.
@@ -38,6 +41,7 @@ class Longplayer:
         Raises:
             ValueError: _description_
         """
+        self.output_device = output_device
         self.num_channels = num_channels
         self.buffer_size = buffer_size
         self.solo = solo
@@ -46,6 +50,8 @@ class Longplayer:
 
         if num_channels not in (1, 2, 6):
             raise ValueError("Invalid number of channels: %d (must be one of 1, 2, 6)" % num_channels)
+        if output_device:
+            sounddevice.default.device = output_device
         self.output_stream = sounddevice.OutputStream(samplerate=SAMPLE_RATE,
                                                       channels=self.num_channels,
                                                       blocksize=self.buffer_size,

@@ -85,7 +85,7 @@ class Longplayer:
                         self.output_block[1][frame] += channel_samples[frame] * (math.sqrt(pan)) / self.num_channels
                 elif self.num_channels == 6:
                     for frame in range(num_frames):
-                        self.output_block[channel_index][frame] = channel_samples[frame]
+                        self.output_block[channel_index][frame] += channel_samples[frame]
 
         for channel in range(self.num_channels):
             for frame in range(num_frames):

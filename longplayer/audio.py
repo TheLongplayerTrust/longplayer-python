@@ -119,7 +119,7 @@ class AudioPlayer:
         #--------------------------------------------------------------------------------
         # Generate amplitude envelope, and perform linear fading between amplitudes.
         #--------------------------------------------------------------------------------
-        amp_envelope = [self.amplitude_level] * sample_count
+        
         for n in range(sample_count):
             if self.amplitude_steps_remaining > 0:
                 self.amplitude_level += self.amplitude_step
@@ -128,9 +128,6 @@ class AudioPlayer:
                     self.amplitude_level = self.amplitude_target
                     if self.amplitude_level == 0.0:
                         self.is_finished = True
-            amp_envelope[n] = math.sqrt(self.amplitude_level)
-
-        for n in range(sample_count):
-            rv[n] *= amp_envelope[n]
+            rv[n] *= self.amplitude_level
 
         return rv

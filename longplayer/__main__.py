@@ -12,6 +12,8 @@ if __name__ == "__main__":
     parser.add_argument("--gain", type=float, help="Gain, in decibels (default: -6.0)", default=DEFAULT_AUDIO_GAIN)
     parser.add_argument("-c", "--num-channels", type=int, help="Number of channels (default: 2)", default=2)
     parser.add_argument("-b", "--buffer-size", type=int, help="Audio buffer size (default: 1024)", default=DEFAULT_BUFFER_SIZE)
+    parser.add_argument("--list-output-devices", action="store_true", help="List available audio output devices")
+    parser.add_argument("--output-device", help="Selected audio output device (use system default if not specified)", default=None)
     parser.add_argument("--solo", type=int, help="Solo a specified layer, from 0 to 5", default=None)
     args = parser.parse_args()
 
@@ -22,9 +24,16 @@ if __name__ == "__main__":
         log_level = logging.WARNING
     logging.basicConfig(level=log_level, format="%(message)s")
 
+    if args.list_output_devices:
+        import sounddevice
+        import sys
+        print(sounddevice.query_devices())
+        sys.exit(1)
+
     try:
-        longplayer = Longplayer(num_channels=args.num_channels,
-                                buffer_size=args.buffer_size,
+        longplayer = Longplayer(output_device=args.output_device,
+                                num_channels=args.num_channels,
+                                buffer_size=args.buffer_size,                        
                                 gain=args.gain,
                                 solo=args.solo)
         longplayer.start()

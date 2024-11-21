@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.1.4](https://github.com/TheLongplayerTrust/longplayer-python/tree/v0.1.4) (2024-??-??)
+
+- Added `--output-device` and `--list-output-devices` flags to select a non-default audio output device
+- Added `--solo` flag to solo individual layers 
+- Updated terminology for consistency with the Longplayer standards
+
 ## [v0.1.3](https://github.com/TheLongplayerTrust/longplayer-python/tree/v0.1.3) (2024-11-18)
 
 - Fixed off-by-one error in resampler

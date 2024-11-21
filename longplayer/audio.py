@@ -1,5 +1,3 @@
-import math
-
 from .constants import SAMPLE_RATE, AUDIO_FADE_TIME, AUDIO_DURATION_SAMPLES
 
 class Resampler:

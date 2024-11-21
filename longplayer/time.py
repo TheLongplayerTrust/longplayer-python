@@ -7,7 +7,7 @@ def get_total_time_elapsed() -> datetime.timedelta:
     Calculate the total running time of Longplayer to date.
 
     This is derived by converting the current time into UTC, and then calculating the
-    time elapsed since 2000-01-01 00:00:00.
+    time elapsed since 2000-01-01 00:00:00 (at the international date line).
 
     Returns:
         datetime.timedelta: The time delta.
@@ -51,9 +51,11 @@ def get_position_for_layer(increments, layer: int = 0) -> tuple[float, float]:
     increments_frac = increments - increments_int
     section_start_position = increments_int * layer_increment / SAMPLE_RATE
     
-    # Be careful here to modulo by the AUDIO_DURATION (1220 seconds),
-    # rather than the actual length of the audio sample, because the sample contains additional audio
-    # at the end to make it easier to loop.
+    #--------------------------------------------------------------------------------
+    # Be careful here to modulo by AUDIO_DURATION (1220 seconds), rather than the
+    # actual length of the audio sample, because the sample contains additional
+    # audio at the end to make it easier to loop.
+    #--------------------------------------------------------------------------------
     section_start_position = section_start_position % AUDIO_DURATION
 
     section_playhead_position = increments_frac * layer_rate * INCREMENT_INTERVAL

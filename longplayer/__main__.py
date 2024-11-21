@@ -1,8 +1,10 @@
 from longplayer import Longplayer, DEFAULT_AUDIO_GAIN, DEFAULT_BUFFER_SIZE
+
+import sounddevice
 import argparse
 import logging
 import time
-from typing import Optional
+import sys
 
 
 if __name__ == "__main__":
@@ -10,7 +12,7 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     parser.add_argument("-q", "--quiet", action="store_true", help="Quiet output")
     parser.add_argument("--gain", type=float, help="Gain, in decibels (default: -6.0)", default=DEFAULT_AUDIO_GAIN)
-    parser.add_argument("-c", "--num-channels", type=int, help="Number of channels (default: 2)", default=2)
+    parser.add_argument("-c", "--channels", type=int, help="Number of channels (default: 2)", default=2)
     parser.add_argument("-b", "--buffer-size", type=int, help="Audio buffer size (default: 1024)", default=DEFAULT_BUFFER_SIZE)
     parser.add_argument("--list-output-devices", action="store_true", help="List available audio output devices")
     parser.add_argument("--output-device", help="Selected audio output device (use system default if not specified)", default=None)
@@ -25,14 +27,12 @@ if __name__ == "__main__":
     logging.basicConfig(level=log_level, format="%(message)s")
 
     if args.list_output_devices:
-        import sounddevice
-        import sys
         print(sounddevice.query_devices())
         sys.exit(1)
 
     try:
         longplayer = Longplayer(output_device=args.output_device,
-                                num_channels=args.num_channels,
+                                num_channels=args.channels,
                                 buffer_size=args.buffer_size,                        
                                 gain=args.gain,
                                 solo=args.solo)

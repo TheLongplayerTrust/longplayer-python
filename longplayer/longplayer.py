@@ -57,7 +57,7 @@ class Longplayer:
                                                       blocksize=self.buffer_size,
                                                       callback=self.audio_callback)
         self.audio_players: list[AudioPlayer] = []
-        self.output_block = [[0] * buffer_size for channel in range(self.num_channels)]
+        self.output_block = [[0] * buffer_size for _ in range(self.num_channels)]
         self.thread = None
         self.gain_linear = 10 ** (gain / 20)
         self.is_running = False

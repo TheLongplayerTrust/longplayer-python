@@ -8,8 +8,8 @@ For more information about Longplayer, read an [overview of the piece](https://l
 
 ## Requirements
 
+- A Linux (including Raspberry Pi), macOS or Windows system with audio output
 - Python 3.9 or above ([python.org](https://www.python.org/downloads/))
-- A Linux or macOS system with audio output
 
 ## Installation
 
@@ -30,3 +30,12 @@ python3 -m longplayer
 ```
 
 Press Ctrl-C to stop playback.
+
+## Troubleshooting
+
+If you are hearing stuttery playback, try:
+
+- increasing the audio buffer size: `python3 -m longplayer --buffer-size 4096`
+- mono (single-channel) playback: `python3 -m longplayer --channels 1`
+
+To see all of the command-line options: `python -m longplayer --help`

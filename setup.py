@@ -15,6 +15,7 @@ setup(
     install_requires = [
         'soundfile',
         'sounddevice',
+        'samplerate',
         'numpy',
     ],
     keywords = ['sound', 'music', 'time', 'soundart'],

@@ -56,3 +56,9 @@ CHANNEL_INCREMENT_SAMPLES = [
     2593.175981469840
 ]
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Whether to use the pure Python implementation of audio resampling.
+# This is less efficient than the libsamplerate implementation, so
+# is not presently recommended, particularly for low-CPU devices.
+#-----------------------------------------------------------------------------------------------------------------------
+USE_INTERNAL_RESAMPLER = False

@@ -1,6 +1,7 @@
 import math
+import samplerate
 
-from .constants import SAMPLE_RATE, AUDIO_FADE_TIME, AUDIO_DURATION_SAMPLES
+from .constants import SAMPLE_RATE, AUDIO_FADE_TIME, AUDIO_DURATION_SAMPLES, USE_INTERNAL_RESAMPLER
 
 class Resampler:
     def __init__(self):
@@ -47,7 +48,10 @@ class AudioPlayer:
         self._phase = initial_phase
         self.rate = rate
         self.buffer = [0]
-        self.resampler = Resampler()
+        if USE_INTERNAL_RESAMPLER:
+            self.resampler = Resampler()
+        else:
+            self.resampler = samplerate.Resampler('sinc_fastest', channels=1)
 
         #--------------------------------------------------------------------------------
         # Amplitude target/steps, used for volume fades when starting/ending playback.
@@ -109,8 +113,11 @@ class AudioPlayer:
         #--------------------------------------------------------------------------------
         while len(self.buffer) < sample_count:
             input_block = self.audio_data[self.phase:self.phase + sample_count]
-            resampled_block = self.resampler.process(input_block, self.rate)
-            self.buffer = self.buffer + resampled_block
+            if USE_INTERNAL_RESAMPLER:
+                resampled_block = self.resampler.process(input_block, self.rate)
+            else:
+                resampled_block = self.resampler.process(input_block, 1.0 / self.rate)
+            self.buffer = self.buffer + list(resampled_block)
             self.phase = self.phase + sample_count
 
         rv = self.buffer[:sample_count]

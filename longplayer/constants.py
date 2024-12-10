@@ -19,20 +19,20 @@ DEFAULT_BUFFER_SIZE = 1024
 #-----------------------------------------------------------------------------------------------------------------------
 # The duration of the Longplayer audio basis is precisely 1220 seconds long.
 # The audio .wav file is longer because it contains a partial repeat of the first section, allowing the playback
-# to loop seamlessly when segments reach the end of the audio.
+# to loop seamlessly when sections reach the end of the audio.
 #-----------------------------------------------------------------------------------------------------------------------
 AUDIO_DURATION = 1220.0
 AUDIO_DURATION_SAMPLES = int(AUDIO_DURATION * SAMPLE_RATE)
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Each playback segment is precisely 2 minutes.
+# Each playback section is precisely 2 minutes.
 #-----------------------------------------------------------------------------------------------------------------------
 INCREMENT_INTERVAL = 120.0
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Duration for audio fades, at startup and between segments.
+# Duration for audio fades, at startup and between sections.
 #-----------------------------------------------------------------------------------------------------------------------
-AUDIO_FADE_TIME = 5.0
+AUDIO_FADE_TIME = 6.0
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Default audio gain, in decibels
@@ -42,12 +42,12 @@ DEFAULT_AUDIO_GAIN = -0.0
 #-----------------------------------------------------------------------------------------------------------------------
 # Channels are numbered from the inside (highest frequency) to the outside (lowest frequency).
 #-----------------------------------------------------------------------------------------------------------------------
-CHANNEL_RATES = [3/2, 4/3, 1, 3/4, 2/3, 1/2]
+LAYER_RATES = [3/2, 4/3, 1, 3/4, 2/3, 1/2]
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Increment steps in samples, on the basis of a sample rate @ 44100kHz.
 #-----------------------------------------------------------------------------------------------------------------------
-CHANNEL_INCREMENT_SAMPLES = [
+LAYER_INCREMENTS_SAMPLES = [
     329.185022026432,
     19751.3059114067,
     0.2045898210232640,

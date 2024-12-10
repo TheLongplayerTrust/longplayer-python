@@ -1,6 +1,6 @@
-from .time import get_total_time_elapsed, get_total_increments_elapsed, get_offset_for_channel
+from .time import get_total_time_elapsed, get_total_increments_elapsed, get_position_for_layer
 from .audio import AudioPlayer
-from .constants import AUDIO_DATA, CHANNEL_RATES, SAMPLE_RATE, DEFAULT_BUFFER_SIZE, DEFAULT_AUDIO_GAIN
+from .constants import AUDIO_DATA, LAYER_RATES, SAMPLE_RATE, DEFAULT_BUFFER_SIZE, DEFAULT_AUDIO_GAIN
 from typing import Optional
 
 import math
@@ -139,9 +139,9 @@ class Longplayer:
         while self.is_running:
             #--------------------------------------------------------------------------------
             # Audio loop.
-            #  - Check whether we are beginning a new segment. If so:
+            #  - Check whether we are beginning a new section. If so:
             #     - begin fade down of existing AudioPlayers
-            #     - create an array of new AudioPlayer objects to play the six segments
+            #     - create an array of new AudioPlayer objects to play the six sections
             #  - Mix the output of all currently-playing AudioPlayers
             #  - Write the output (synchronously) to the audio device
             #--------------------------------------------------------------------------------
@@ -158,13 +158,13 @@ class Longplayer:
                 for audio_player in self.audio_players:
                     audio_player.fade_down()
 
-                for channel_index, rate in enumerate(CHANNEL_RATES):
-                    offset, position = get_offset_for_channel(increments, channel_index)
-                    logger.debug(" - channel %d: offset %.3fs, position %.3fs" % (channel_index, offset, position))
+                for layer_index, rate in enumerate(LAYER_RATES):
+                    section_start_position, section_playhead_position = get_position_for_layer(increments, layer_index)
+                    logger.debug(" - layer %d: start position %.3fs, playhead position %.3fs" % (layer_index, section_start_position, section_playhead_position))
 
-                    offset_samples = offset * SAMPLE_RATE
-                    position_samples = position * SAMPLE_RATE
-                    initial_phase = int(offset_samples + position_samples)
+                    section_start_position_samples = section_start_position * SAMPLE_RATE
+                    section_playhead_position_samples = section_playhead_position * SAMPLE_RATE
+                    initial_phase = int(section_start_position_samples + section_playhead_position_samples)
                     player = AudioPlayer(audio_data=AUDIO_DATA,
                                          initial_phase=initial_phase,
                                          rate=rate)

@@ -1,5 +1,5 @@
 import datetime
-from .constants import INCREMENT_INTERVAL, CHANNEL_RATES, CHANNEL_INCREMENT_SAMPLES, SAMPLE_RATE, AUDIO_DURATION
+from .constants import INCREMENT_INTERVAL, LAYER_RATES, LAYER_INCREMENTS_SAMPLES, SAMPLE_RATE, AUDIO_DURATION
 
 
 def get_total_time_elapsed() -> datetime.timedelta:
@@ -29,26 +29,32 @@ def get_total_increments_elapsed() -> float:
     return increments_elapsed
 
 
-def get_offset_for_channel(increments, channel: int = 0) -> tuple[float, float]:
+def get_position_for_layer(increments, layer: int = 0) -> tuple[float, float]:
     """
-    For a given channel, calculate the position of the playback head given a specific number of elapsed increments.
-    Each segment moves forward every 120 seconds, at a rate specific to each channel.
-    At this point, the playback head resets to the start of the segment.
-    Over the course of the 120-second segment, the playback head sweeps forward at the channel's playback rate.
+    For a given layer, calculate the position of the playback head given a specific number of elapsed increments.
+    Each section moves forward every 120 seconds, at a rate specific to each layer.
+    At this point, the playback head resets to the start of the section.
+    Over the course of the 120-second section, the playback head sweeps forward at the layer's playback rate.
 
     Args:
         increments (float): The total number of increments elapsed since 2000-01-01 00:00:00.
-        channel (int): Index of the channel number.
+        layer (int): Index of the layer number.
 
     Returns:
-        (offset (float), position(float)): Tuple containing the offset of the current segment and the position within
-                                           the segment, both in seconds.
+        (section_start_position (float), section_playhead_position(float)):
+            Tuple containing the start point of the current section and the position within
+            the section, both in seconds.
     """
-    channel_rate = CHANNEL_RATES[channel]
-    channel_increment = CHANNEL_INCREMENT_SAMPLES[channel]
+    layer_rate = LAYER_RATES[layer]
+    layer_increment = LAYER_INCREMENTS_SAMPLES[layer]
     increments_int = int(increments)
     increments_frac = increments - increments_int
-    segment_offset = increments_int * channel_increment / SAMPLE_RATE
-    segment_offset = segment_offset % AUDIO_DURATION
-    segment_position = increments_frac * channel_rate * INCREMENT_INTERVAL
-    return segment_offset, segment_position
+    section_start_position = increments_int * layer_increment / SAMPLE_RATE
+    
+    # Be careful here to modulo by the AUDIO_DURATION (1220 seconds),
+    # rather than the actual length of the audio sample, because the sample contains additional audio
+    # at the end to make it easier to loop.
+    section_start_position = section_start_position % AUDIO_DURATION
+
+    section_playhead_position = increments_frac * layer_rate * INCREMENT_INTERVAL
+    return section_start_position, section_playhead_position

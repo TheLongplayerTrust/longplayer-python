@@ -52,8 +52,11 @@ class Longplayer:
             raise ValueError("Invalid number of channels: %d (must be one of 1, 2, 6)" % num_channels)
         if output_device:
             sounddevice.default.device = output_device
+        #--------------------------------------------------------------------------------
+        # Do not specify the number of channels to use, but instead use
+        # all available channels on the device.
+        #--------------------------------------------------------------------------------
         self.output_stream = sounddevice.OutputStream(samplerate=SAMPLE_RATE,
-                                                      channels=self.num_channels,
                                                       blocksize=self.buffer_size,
                                                       callback=self.audio_callback)
         self.audio_players: list[AudioPlayer] = []
@@ -90,6 +93,14 @@ class Longplayer:
         for channel in range(self.num_channels):
             for frame in range(num_frames):
                 outdata[frame][channel] = self.output_block[channel][frame] * self.gain_linear
+        #--------------------------------------------------------------------------------
+        # Write silence to any unused channels.
+        # Otherwise, PulseAudio may output unpleasant noise.
+        #--------------------------------------------------------------------------------
+        if self.output_stream.channels > self.num_channels:
+            for channel in range(self.num_channels, self.output_stream.channels):
+                for frame in range(num_frames):
+                    outdata[frame][channel] = 0.0
     
     def print_run_time(self):
         #--------------------------------------------------------------------------------

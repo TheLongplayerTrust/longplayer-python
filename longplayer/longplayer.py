@@ -1,12 +1,14 @@
 from .time import get_total_time_elapsed, get_total_increments_elapsed, get_position_for_layer
 from .audio import AudioPlayer
-from .constants import AUDIO_DATA, LAYER_RATES, SAMPLE_RATE, DEFAULT_BUFFER_SIZE, DEFAULT_AUDIO_GAIN
+from .constants import LAYER_RATES, SAMPLE_RATE, DEFAULT_BUFFER_SIZE, DEFAULT_AUDIO_GAIN, AUDIO_PATH
+from .utils import download_longplayer_audio
 from typing import Optional
 
 import math
 import time
 import logging
 import threading
+import soundfile
 import sounddevice
 
 logger = logging.getLogger(__name__)
@@ -52,6 +54,8 @@ class Longplayer:
             raise ValueError("Invalid number of channels: %d (must be one of 1, 2, 6)" % num_channels)
         if output_device:
             sounddevice.default.device = output_device
+
+
         #--------------------------------------------------------------------------------
         # Do not specify the number of channels to use, but instead use
         # all available channels on the device.
@@ -125,6 +129,11 @@ class Longplayer:
         Begin playback. Blocks indefinitely.
         """
 
+        download_longplayer_audio()
+        audio_fd = soundfile.SoundFile(AUDIO_PATH)
+        assert audio_fd.samplerate == SAMPLE_RATE
+        audio_data = audio_fd.read()
+
         logger.info("Longplayer, by Jem Finer.")
         self.print_run_time()
 
@@ -165,7 +174,7 @@ class Longplayer:
                     section_start_position_samples = section_start_position * SAMPLE_RATE
                     section_playhead_position_samples = section_playhead_position * SAMPLE_RATE
                     initial_phase = int(section_start_position_samples + section_playhead_position_samples)
-                    player = AudioPlayer(audio_data=AUDIO_DATA,
+                    player = AudioPlayer(audio_data=audio_data,
                                          initial_phase=initial_phase,
                                          rate=rate)
                     self.audio_players.append(player)

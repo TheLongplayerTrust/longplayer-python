@@ -17,6 +17,7 @@ setup(
         'sounddevice',
         'samplerate',
         'numpy',
+        'requests',
     ],
     keywords = ['sound', 'music', 'time', 'soundart'],
     classifiers = [

@@ -52,7 +52,7 @@ class Longplayer:
 
         if num_channels not in (1, 2, 6):
             raise ValueError("Invalid number of channels: %d (must be one of 1, 2, 6)" % num_channels)
-        if output_device:
+        if output_device is not None:
             sounddevice.default.device = output_device
 
 

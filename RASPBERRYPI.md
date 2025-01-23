@@ -40,7 +40,7 @@ Below is a list of recommended parts.
 # cmake and python3-dev are needed for to build libsamplerate
 # libsndfile needed to read audio file
 sudo apt install -y git cmake python3-dev libsndfile1 libportaudio2
-git clone git@github.com:TheLongplayerTrust/longplayer-python
+git clone https://github.com/TheLongplayerTrust/longplayer-python.git
 cd longplayer-python
 python3 -m venv .venv
 . .venv/bin/activate
@@ -73,7 +73,7 @@ sudo systemctl start longplayer
 First, enable SPI within `sudo raspi-config`, and reboot. Then, install and run the `longplayer-oled-display` package, from within `/home/pi`:
 
 ```sh
-git clone git@github.com:TheLongplayerTrust/longplayer-oled-display
+git clone https://github.com/TheLongplayerTrust/longplayer-oled-display.git
 cd longplayer-oled-display
 python3 -m venv .venv
 . .venv/bin/activate

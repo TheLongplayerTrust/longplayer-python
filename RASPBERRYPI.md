@@ -6,6 +6,8 @@ Clock synchronisation can either be done via the internet (using NTP, either by 
 
 It also includes support for an optional OLED status display.
 
+![Longplayer Raspberry Pi Listening Post](https://github.com/user-attachments/assets/4211b93c-abd3-4850-aa35-382d02981bd9)
+
 # Parts list
 
 Below is a list of recommended parts. 

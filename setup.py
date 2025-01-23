@@ -29,7 +29,7 @@ setup(
         'Intended Audience :: End Users/Desktop'
     ],
     package_data={
-        'longplayer': ['audio/20-20.aif']
+        'longplayer': ['audio/20-20.wav']
     },
     include_package_data=True,
     entry_points={

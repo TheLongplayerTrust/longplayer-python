@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name = 'longplayer',
-    version = '0.1.3',
+    version = '0.2.0',
     description = 'Longplayer, a thousand-year long musical composition, implemented in Python',
     long_description = open("README.md", "r").read(),
     long_description_content_type = "text/markdown",

@@ -1,10 +1,12 @@
 # Changelog
 
-## [v0.1.4](https://github.com/TheLongplayerTrust/longplayer-python/tree/v0.1.4) (2024-??-??)
+## [v0.2.0](https://github.com/TheLongplayerTrust/longplayer-python/tree/v0.2.0) (2024-01-23)
 
+- Optimizations: Use `numpy` for numerical calculations; perform audio processing in a non-real-time thread
+- Automatically download the Longplayer audio if it does not exist locally
+- Updated language for consistency with the [standard Longplayer terminology](https://github.com/thelongplayertrust)
 - Added `--output-device` and `--list-output-devices` flags to select a non-default audio output device
 - Added `--solo` flag to solo individual layers 
-- Updated terminology for consistency with the Longplayer standards
 
 ## [v0.1.3](https://github.com/TheLongplayerTrust/longplayer-python/tree/v0.1.3) (2024-11-18)
 

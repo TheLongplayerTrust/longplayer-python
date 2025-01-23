@@ -2,7 +2,7 @@
 
 ## Creating a release
 
-- Copy the Longplayer audio file [20-20.aif](https://longplayer.org/audio/20-20.aif.zip) to the `longplayer/audio` directory
+- Copy the Longplayer audio file [20-20.wav](https://longplayer.org/audio/20-20.wav.zip) to the `longplayer/audio` directory
 - Increment the version in `setup.py`
 - Add a new entry to `CHANGELOG.md`
 - Run `git tag vx.y.z`, and `git push --tags`

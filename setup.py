@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
 
+import os
 from setuptools import setup
+
+def get_version():
+    version_file = os.path.join(os.path.dirname(__file__), "longplayer", "__init__.py")
+    with open(version_file, "r") as f:
+        for line in f:
+            if line.startswith("__version__"):
+                delim = '"' if '"' in line else "'"
+                return line.split(delim)[1]
+    raise RuntimeError("Unable to find version string.")
 
 setup(
     name = 'longplayer',
-    version = '0.2.0',
+    version = get_version(),
     description = 'Longplayer, a thousand-year long musical composition, implemented in Python',
     long_description = open("README.md", "r").read(),
     long_description_content_type = "text/markdown",

@@ -1,5 +1,6 @@
 import math
 import samplerate
+import numpy as np
 
 from .constants import SAMPLE_RATE, AUDIO_FADE_TIME, AUDIO_DURATION_SAMPLES, USE_INTERNAL_RESAMPLER
 
@@ -98,7 +99,7 @@ class AudioPlayer:
         self.amplitude_steps_remaining = duration * SAMPLE_RATE
         self.amplitude_step = (self.amplitude_target - self.amplitude_level) / self.amplitude_steps_remaining
 
-    def get_samples(self, sample_count) -> list:
+    def get_samples(self, sample_count) -> np.ndarray:
         """
         Returns `sample_count` samples, resampled to the new rate.
 
@@ -137,4 +138,4 @@ class AudioPlayer:
                         self.is_finished = True
             rv[n] *= self.amplitude_level
 
-        return rv
+        return np.array(rv)

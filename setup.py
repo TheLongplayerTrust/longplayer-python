@@ -17,6 +17,7 @@ setup(
         'sounddevice',
         'samplerate',
         'numpy',
+        'blockbuffer',
         'requests',
     ],
     keywords = ['sound', 'music', 'time', 'soundart'],

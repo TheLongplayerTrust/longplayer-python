@@ -10,6 +10,8 @@ import logging
 import threading
 import soundfile
 import sounddevice
+import blockbuffer
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -64,47 +66,58 @@ class Longplayer:
                                                       blocksize=self.buffer_size,
                                                       callback=self.audio_callback)
         self.audio_players: list[AudioPlayer] = []
-        self.output_block = [[0] * buffer_size for _ in range(self.num_channels)]
+        
         self.thread = None
         self.gain_linear = 10 ** (gain / 20)
         self.is_running = False
+        self.output_block = np.zeros((buffer_size, num_channels))
+        self.blockbuffer = blockbuffer.BlockBuffer(block_size=self.buffer_size, num_channels=num_channels, always_2d=True)
+
+        self.render_thread = threading.Thread(target=self.render_audio_loop)
+        self.render_thread.daemon = True
+        self.render_thread.start()
         
     def audio_callback(self, outdata, num_frames, time, status):
-        for channel in range(self.num_channels):
-            for frame in range(num_frames):
-                self.output_block[channel][frame] = 0
+        # Be sure to write silence to all channels.
+        # Otherwise, some backends (e.g. pulseaudio) will generate noise to unused channels.
 
+        block = self.blockbuffer.get()
+        if block is not None:
+            outdata[:,:self.num_channels] = block
+            outdata[:,self.num_channels:] = 0
+        else:
+            outdata[:] = 0
+            logger.warning("audio_callback: No samples available!")
+
+    def render_audio_loop(self):
+        while True:
+            if self.blockbuffer.length < self.buffer_size * 4:
+                self.render_block(self.buffer_size)
+            time.sleep(0.005)
+
+    def render_block(self, num_frames):
+        self.output_block[:] = 0.0
         if len(self.audio_players) > 0:
             for player_index, audio_player in enumerate(self.audio_players):
                 channel_index = player_index % 6
 
                 if self.solo is not None and self.solo != channel_index:
                     continue
+                if audio_player.is_finished:
+                    continue
 
                 channel_samples = audio_player.get_samples(num_frames)
                 if self.num_channels == 1:
-                    for frame in range(num_frames):
-                        self.output_block[0][frame] += channel_samples[frame] / self.num_channels
+                    self.output_block[:,0] += channel_samples
                 elif self.num_channels == 2:
                     pan = channel_index / 5
-                    for frame in range(num_frames):
-                        self.output_block[0][frame] += channel_samples[frame] * (1 - math.sqrt(pan)) / self.num_channels
-                        self.output_block[1][frame] += channel_samples[frame] * (math.sqrt(pan)) / self.num_channels
+                    self.output_block[:,0] += channel_samples * (1 - math.sqrt(pan)) / self.num_channels
+                    self.output_block[:,1] += channel_samples * (math.sqrt(pan)) / self.num_channels
                 elif self.num_channels == 6:
-                    for frame in range(num_frames):
-                        self.output_block[channel_index][frame] += channel_samples[frame]
+                    self.output_block[:,channel_index] += channel_samples / self.num_channels
 
-        for channel in range(self.num_channels):
-            for frame in range(num_frames):
-                outdata[frame][channel] = self.output_block[channel][frame] * self.gain_linear
-        #--------------------------------------------------------------------------------
-        # Write silence to any unused channels.
-        # Otherwise, PulseAudio may output unpleasant noise.
-        #--------------------------------------------------------------------------------
-        if self.output_stream.channels > self.num_channels:
-            for channel in range(self.num_channels, self.output_stream.channels):
-                for frame in range(num_frames):
-                    outdata[frame][channel] = 0.0
+        self.output_block *= self.gain_linear
+        self.blockbuffer.extend(self.output_block)
     
     def print_run_time(self):
         #--------------------------------------------------------------------------------

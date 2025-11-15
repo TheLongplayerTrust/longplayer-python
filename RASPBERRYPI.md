@@ -1,10 +1,10 @@
-# Installation instructions for a Raspberry Pi Listening Post
+# Installation instructions for a Longplayer Raspberry Pi Listening Post
 
-This guide includes information on setting up a Raspberry Pi Longplayer listening post. You will need a good working understanding of the command line and general Pi/Linux configuration.
+This is a guide to setting up a [Longplayer](https://longplayer.org/) Listening Post on a [Raspberry Pi](https://www.raspberrypi.com/) single-board computer. You will need a good working understanding of the command line and general familiarity with Linux and Raspberry Pi concepts.
 
-Clock synchronisation can either be done via the internet (using NTP, either by ethernet or Wi-Fi), or via a GPS board with an integrated real-time clock. The latter option enables accurate time-sync in offline situations.
+The Longplayer algorithm depends on having an accurate system clock. Clock synchronisation is normally achieved using Network Time Protocol (NTP) via internet time servers, which is installed by default with Raspberry Pi OS. For situations in which the Listening Post may have no internet connection, clock synchronisation can alternatively be achieved via a GPS board with an integrated real-time clock, via the atomic clocks on GNSS satellite networks.
 
-It also includes support for an optional OLED status display.
+This guide includes information on both approaches to clock sync. It also includes support for an optional OLED status display.
 
 ![Longplayer Raspberry Pi Listening Post](https://github.com/user-attachments/assets/4211b93c-abd3-4850-aa35-382d02981bd9)
 
@@ -14,8 +14,8 @@ Below is a list of recommended parts.
 
 - Computing
     - [Raspberry Pi 5 4GB](https://thepihut.com/products/raspberry-pi-5?variant=42531604922563)
-    - [27W power supply](https://thepihut.com/products/raspberry-pi-27w-usb-c-power-supply?variant=42531604168899)
-    - [Sandisk Extreme microSD card](https://shop.sandisk.com/en-gb/products/memory-cards/microsd-cards/sandisk-extreme-uhs-i-microsd?sku=SDSQXAF-032G-GN6MA)
+    - [Raspberry Pi official 27W power supply](https://thepihut.com/products/raspberry-pi-27w-usb-c-power-supply?variant=42531604168899)
+    - [Sandisk Extreme microSD card](https://shop.sandisk.com/en-gb/products/memory-cards/microsd-cards/sandisk-extreme-uhs-i-microsd?sku=SDSQXAF-032G-GN6MA). For situations in which the Raspberry Pi may be unplugged frequently, an Industrial microSD card is recommended. Alternatively, after installation, the filesystem may be configured in [read-only mode](https://learn.adafruit.com/read-only-raspberry-pi/overview).
 - Audio
     - Any good-quality class-compliant audio interface capable of 44100Hz is fine. 
     - Recommended for stereo (2-channel) output: [Creative Sound Blaster Play!3](https://www.amazon.co.uk/Creative-Sound-Blaster-Resolution-External/dp/B073KTPNDR/) 
@@ -28,12 +28,11 @@ Below is a list of recommended parts.
     - [2.23” OLED HAT](https://thepihut.com/products/128x32-2-23inch-oled-display-hat-for-raspberry-pi?variant=31844782374974)
     - [Black nylon M2.5 standoffs](https://thepihut.com/products/adafruit-black-nylon-screw-and-stand-off-set-m2-5-thread?variant=31955887377)
 
-
 # Guide
 
 ## 1. General device setup
 
-- Using Raspberry Pi Imager, flash a high-endurance microSD card (8GB or above) with the latest Raspberry Pi OS Lite
+- Using Raspberry Pi Imager, flash a microSD card (8GB or above) with the latest Raspberry Pi OS Lite
 - Update the system: `sudo apt update`
 
 ## 2. Install the Longplayer player code

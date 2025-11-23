@@ -57,6 +57,7 @@ python3 -m longplayer --output-device 0 --gain -12
 To install the player as a system service, to boot on startup:
 
 ```
+sudo longplayer-python
 sudo cp auxiliary/longplayer.service /etc/systemd/system
 sudo systemctl daemon-reload
 sudo systemctl enable longplayer

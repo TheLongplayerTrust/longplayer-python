@@ -87,6 +87,7 @@ python3 display-status.py
 To install the package as a system service, to boot on startup:
 
 ```
+cd longplayer-oled-display
 sudo cp auxiliary/longplayer-oled-display.service /etc/systemd/system
 sudo systemctl daemon-reload
 sudo systemctl enable longplayer-oled-display

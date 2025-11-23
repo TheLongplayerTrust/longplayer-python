@@ -32,7 +32,7 @@ Below is a list of recommended parts.
 
 ## 1. General device setup
 
-- Using Raspberry Pi Imager, flash a microSD card (8GB or above) with the latest Raspberry Pi OS Lite
+- Using Raspberry Pi Imager, flash a microSD card (8GB or above) with the *bookworm 64-bit version of Raspberry Pi OS Lite*
 - Update the system: `sudo apt update`
 
 ## 2. Install the Longplayer player code

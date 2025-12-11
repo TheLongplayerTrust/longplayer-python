@@ -1,4 +1,3 @@
-import math
 import samplerate
 import numpy as np
 
@@ -8,6 +7,8 @@ class Resampler:
     def __init__(self):
         """
         Resampler with linear interpolation.
+        Generally, libsamplerate is preferred as it is significantly more efficient
+        and high-quality, but this can be used on systems where libsamplerate is not available.
         """
         self.phase = 0.0
         self.buffer = []

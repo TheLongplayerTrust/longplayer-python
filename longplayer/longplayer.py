@@ -1,6 +1,6 @@
 from .time import get_total_time_elapsed, get_total_increments_elapsed, get_position_for_layer
 from .audio import AudioPlayer
-from .constants import LAYER_RATES, SAMPLE_RATE, DEFAULT_BUFFER_SIZE, DEFAULT_AUDIO_GAIN, AUDIO_PATH
+from .constants import LAYER_RATES, SAMPLE_RATE, DEFAULT_BUFFER_SIZE, DEFAULT_AUDIO_GAIN, AUDIO_PATH, AUDIO_END_FADE_TIME
 from .utils import download_longplayer_audio
 from typing import Optional
 
@@ -39,11 +39,12 @@ class Longplayer:
                                           When 6, output is separated into 6 individual channels.
                                           Defaults to 2.
             buffer_size (int): Length of audio output buffer, in samples.
-            gain (float, optional): Output gain, in decibels. Defaults to -6.0.
+            gain (float, optional): Output gain, in decibels. Defaults to 0.0 (i.e., unity gain).
             solo (int, optional): If specified, solo a particular layer number, from 0 to 5.
+                                  Typically only used for debugging.
 
         Raises:
-            ValueError: _description_
+            ValueError: If a parameter value is invalid.
         """
         self.output_device = output_device
         self.num_channels = num_channels
@@ -56,7 +57,6 @@ class Longplayer:
             raise ValueError("Invalid number of channels: %d (must be one of 1, 2, 6)" % num_channels)
         if output_device is not None:
             sounddevice.default.device = output_device
-
 
         #--------------------------------------------------------------------------------
         # Do not specify the number of channels to use, but instead use
@@ -73,12 +73,11 @@ class Longplayer:
         self.output_block = np.zeros((buffer_size, num_channels))
         self.blockbuffer = blockbuffer.BlockBuffer(block_size=self.buffer_size, num_channels=num_channels, always_2d=True)
 
-        self.render_thread = threading.Thread(target=self.render_audio_loop)
-        self.render_thread.daemon = True
+        self.render_thread = threading.Thread(target=self.render_audio_loop, daemon=True)
         self.render_thread.start()
         
     def audio_callback(self, outdata, num_frames, time, status):
-        # Be sure to write silence to all channels.
+        # Be sure to write silence to all channels beyond those rendered by Longplayer.
         # Otherwise, some backends (e.g. pulseaudio) will generate noise to unused channels.
 
         block = self.blockbuffer.get()
@@ -201,15 +200,23 @@ class Longplayer:
             time.sleep(0.1)
 
         for audio_player in self.audio_players[:]:
-            audio_player.fade_down(0.2)
+            audio_player.fade_down(AUDIO_END_FADE_TIME)
+
+        time.sleep(AUDIO_END_FADE_TIME)
+
+        self.output_stream.stop()
 
     def start(self):
         """
         Begin playback using the default system audio output device, based on the system's current timestamp.
         """
-
         self.thread = threading.Thread(target=self.run, daemon=True)
         self.thread.start()
 
     def stop(self):
+        """
+        End playback.
+        Blocks until playback is complete, and audio streams have been faded down and closed.
+        """
         self.is_running = False
+        self.thread.join()

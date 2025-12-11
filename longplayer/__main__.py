@@ -40,6 +40,5 @@ if __name__ == "__main__":
         while True:
             time.sleep(0.1)
     except KeyboardInterrupt:
-        print("\nExiting...")
+        print("\nExiting Longplayer...")
         longplayer.stop()
-        time.sleep(0.5)

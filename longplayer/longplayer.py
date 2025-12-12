@@ -1,5 +1,6 @@
 from .time import get_total_time_elapsed, get_total_increments_elapsed, get_position_for_layer
 from .audio import AudioPlayer
+from .streaming import LongplayerIcecastStreamer, IcecastConfig
 from .constants import LAYER_RATES, SAMPLE_RATE, DEFAULT_BUFFER_SIZE, DEFAULT_AUDIO_GAIN, AUDIO_PATH, AUDIO_END_FADE_TIME
 from .utils import download_longplayer_audio
 from typing import Optional
@@ -13,7 +14,7 @@ import sounddevice
 import blockbuffer
 import numpy as np
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("longplayer")
 
 
 class Longplayer:
@@ -22,7 +23,8 @@ class Longplayer:
                  num_channels: int = 2,
                  buffer_size: int = DEFAULT_BUFFER_SIZE,
                  gain: float = DEFAULT_AUDIO_GAIN,
-                 solo: Optional[int] = None):
+                 solo: Optional[int] = None,
+                 icecast_config: Optional[IcecastConfig] = None):
         """
         Longplayer composition logic.
 
@@ -42,6 +44,8 @@ class Longplayer:
             gain (float, optional): Output gain, in decibels. Defaults to 0.0 (i.e., unity gain).
             solo (int, optional): If specified, solo a particular layer number, from 0 to 5.
                                   Typically only used for debugging.
+            icecast_config (IcecastConfig, optional): Icecast streaming configuration.
+                                                      If not specified, default config will be used.
 
         Raises:
             ValueError: If a parameter value is invalid.
@@ -71,7 +75,14 @@ class Longplayer:
         self.gain_linear = 10 ** (gain / 20)
         self.is_running = False
         self.output_block = np.zeros((buffer_size, num_channels))
-        self.blockbuffer = blockbuffer.BlockBuffer(block_size=self.buffer_size, num_channels=num_channels, always_2d=True)
+        self.blockbuffer = blockbuffer.BlockBuffer(block_size=self.buffer_size,
+                                                   num_channels=num_channels,
+                                                   always_2d=True)
+
+        if icecast_config is None:
+            self.streamer = None
+        else:
+            self.streamer = LongplayerIcecastStreamer(icecast_config=icecast_config)
 
         self.render_thread = threading.Thread(target=self.render_audio_loop, daemon=True)
         self.render_thread.start()
@@ -115,6 +126,9 @@ class Longplayer:
                 elif self.num_channels == 6:
                     self.output_block[:,channel_index] += channel_samples / self.num_channels
 
+        if self.streamer is not None:
+            self.streamer.push_block(self.output_block.copy())
+
         self.output_block *= self.gain_linear
         self.blockbuffer.extend(self.output_block)
     
@@ -153,6 +167,12 @@ class Longplayer:
         # Open the default sound output device.
         #---------------------------------------------------------------------------------------------------------------
         self.output_stream.start()
+
+        #---------------------------------------------------------------------------------------------------------------
+        # Start the streamer process
+        #---------------------------------------------------------------------------------------------------------------
+        if self.streamer is not None:
+            self.streamer.start()
 
         last_increments_int = None
         self.is_running = True

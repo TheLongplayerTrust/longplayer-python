@@ -16,7 +16,7 @@ For more information about Longplayer, read an [overview of the piece](https://l
 If you're using Linux (including Raspberry Pi), you will need to install some additional libraries for audio I/O and resampling:
 
 ```
-sudo apt install -y cmake python3-dev libsndfile1 libportaudio2
+sudo apt install -y cmake python3-dev libsndfile1 libportaudio2 libshout3-dev
 ```
 
 To install Longplayer from the command line, for any platform, open up a terminal session and enter:

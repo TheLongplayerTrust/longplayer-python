@@ -29,6 +29,8 @@ setup(
         'numpy',
         'blockbuffer',
         'requests',
+        'python-shout',
+        'lameenc',
     ],
     keywords = ['sound', 'music', 'time', 'soundart'],
     classifiers = [

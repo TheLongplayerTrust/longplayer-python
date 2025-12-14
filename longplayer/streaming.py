@@ -24,18 +24,8 @@ class LongplayerIcecastStreamer:
     def __init__(self, icecast_config: IcecastConfig = None):
         self.config = icecast_config
         self.is_running = False
+        self.is_connected = False
         self.thread = None
-
-        # --------------------------------------------------------------------------------
-        # Create Icecast client
-        # --------------------------------------------------------------------------------
-        self.client = shout.Shout()
-        self.client.host = icecast_config.host
-        self.client.mount = icecast_config.mount
-        self.client.port = icecast_config.port
-        self.client.user = icecast_config.user
-        self.client.password = icecast_config.password
-        self.client.format = "mp3"
 
         # --------------------------------------------------------------------------------
         # Create mp3 encoder
@@ -47,7 +37,7 @@ class LongplayerIcecastStreamer:
         self.encoder.set_quality(2)  # 2 = highest, 7 = fastest
         self.queue = queue.Queue()
 
-        logger.debug("Streamer: Initialized Icecast streamer and mp3 encoder")
+        logger.debug("Streamer: Initialized mp3 encoder")
 
     def step(self):
         try:
@@ -76,20 +66,51 @@ class LongplayerIcecastStreamer:
         self.client.sync()
 
     def runloop(self):
+        self.is_running = True
         try:
-            while self.is_running:
-                self.step()
-                time.sleep(0.005)
-        except Exception as e:
-            # In case of exceptions, exit the whole process.
-            # In production, this will cause systemctl to restart Longplayer.
-            logger.error("Exception in streaming: %s" % e)
+            self.connect()
+            self.is_connected = True
+        except shout.ShoutException as e:
+            logger.error("Streamer: Failed to connect to Icecast server: %s" % str(e))
             os._exit(1)
 
-    def start(self):
-        self.is_running = True
+        while self.is_running:
+            try:
+                self.step()
+            except shout.ShoutException as e:
+                logger.error("Streamer: Connection lost: %s" % str(e))
+                self.client.close()
+                self.is_connected = False
 
+                #--------------------------------------------------------------------------------
+                # Attempt reconnection with 5-second delay between attempts
+                #--------------------------------------------------------------------------------
+                while not self.is_connected and self.is_running:
+                    try:
+                        time.sleep(5)
+                        logger.info("Streamer: Attempting reconnection to Icecast server...")
+                        self.connect()
+                        self.is_connected = True
+                    except shout.ShoutException as e:
+                        logger.error("Streamer: Reconnection failed (%s)" % str(e))
+            time.sleep(0.005)
+    
+    def connect(self):
         try:
+            logger.debug("Streamer: Connecting to Icecast server at %s:%d%s..." % (self.config.host, 
+                                                                                  self.config.port, 
+                                                                                  self.config.mount))
+            
+            # --------------------------------------------------------------------------------
+            # Create Icecast client
+            # --------------------------------------------------------------------------------
+            self.client = shout.Shout()
+            self.client.host = self.config.host
+            self.client.mount = self.config.mount
+            self.client.port = self.config.port
+            self.client.user = self.config.user
+            self.client.password = self.config.password
+            self.client.format = "mp3"
             self.client.open()
         except shout.ShoutException as e:
             raise e
@@ -100,7 +121,9 @@ class LongplayerIcecastStreamer:
 
         self.client.set_metadata({
             "song": "Longplayer"
-        })
+        })        
+
+    def start(self):
         self.thread = threading.Thread(target=self.runloop,
                                        daemon=True)
         self.thread.start()

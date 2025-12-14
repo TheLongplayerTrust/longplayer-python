@@ -222,8 +222,10 @@ class Longplayer:
         for audio_player in self.audio_players[:]:
             audio_player.fade_down(AUDIO_END_FADE_TIME)
 
+        logger.debug("Longplayer: Waiting for audio fades to complete...")
         time.sleep(AUDIO_END_FADE_TIME)
 
+        logger.debug("Longplayer: Stopping audio stream...")
         self.output_stream.stop()
 
     def start(self):
@@ -240,3 +242,5 @@ class Longplayer:
         """
         self.is_running = False
         self.thread.join()
+        if self.streamer is not None:
+            self.streamer.stop()

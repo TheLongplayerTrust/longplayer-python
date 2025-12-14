@@ -1,3 +1,4 @@
+import os
 import time
 import shout
 import queue
@@ -75,9 +76,15 @@ class LongplayerIcecastStreamer:
         self.client.sync()
 
     def runloop(self):
-        while self.is_running:
-            self.step()
-            time.sleep(0.005)
+        try:
+            while self.is_running:
+                self.step()
+                time.sleep(0.005)
+        except Exception as e:
+            # In case of exceptions, exit the whole process.
+            # In production, this will cause systemctl to restart Longplayer.
+            logger.error("Exception in streaming: %s" % e)
+            os._exit(1)
 
     def start(self):
         self.is_running = True

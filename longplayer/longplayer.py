@@ -109,7 +109,8 @@ class Longplayer:
 
     def render_block(self, num_frames):
         self.output_block[:] = 0.0
-        self.streamer_output_block[:] = 0.0
+        if self.streamer_output_block is not None:
+            self.streamer_output_block[:] = 0.0
         if len(self.audio_players) > 0:
             for player_index, audio_player in enumerate(self.audio_players):
                 channel_index = player_index % 6

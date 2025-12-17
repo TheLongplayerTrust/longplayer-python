@@ -81,8 +81,10 @@ class Longplayer:
 
         if icecast_config is None:
             self.streamer = None
+            self.streamer_output_block = None
         else:
             self.streamer = LongplayerIcecastStreamer(icecast_config=icecast_config)
+            self.streamer_output_block = np.zeros((buffer_size, 2))
 
         self.render_thread = threading.Thread(target=self.render_audio_loop, daemon=True)
         self.render_thread.start()
@@ -107,6 +109,7 @@ class Longplayer:
 
     def render_block(self, num_frames):
         self.output_block[:] = 0.0
+        self.streamer_output_block[:] = 0.0
         if len(self.audio_players) > 0:
             for player_index, audio_player in enumerate(self.audio_players):
                 channel_index = player_index % 6
@@ -117,6 +120,7 @@ class Longplayer:
                     continue
 
                 channel_samples = audio_player.get_samples(num_frames)
+
                 if self.num_channels == 1:
                     self.output_block[:,0] += channel_samples
                 elif self.num_channels == 2:
@@ -126,8 +130,21 @@ class Longplayer:
                 elif self.num_channels == 6:
                     self.output_block[:,channel_index] += channel_samples / self.num_channels
 
+                #--------------------------------------------------------------------------------
+                # For streaming output, mix down to stereo if necessary.
+                #--------------------------------------------------------------------------------
+                if self.streamer is not None:
+                    if self.num_channels == 2:
+                        #--------------------------------------------------------------------------------
+                        # Output is already in stereo, so just copy the samples across.
+                        #--------------------------------------------------------------------------------
+                        self.streamer_output_block[:] = self.output_block[:]
+                    else:
+                        self.streamer_output_block[:,0] += channel_samples * (1 - math.sqrt(channel_index / 5)) / 2
+                        self.streamer_output_block[:,1] += channel_samples * (math.sqrt(channel_index / 5)) / 2
+
         if self.streamer is not None:
-            self.streamer.push_block(self.output_block.copy())
+            self.streamer.push_block(self.streamer_output_block.copy())
 
         self.output_block *= self.gain_linear
         self.blockbuffer.extend(self.output_block)

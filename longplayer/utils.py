@@ -51,7 +51,8 @@ def parse_icecast_config() -> IcecastConfig | None:
     
     config_path = os.path.join(config_dir, "config")
     if not os.path.exists(config_path):
-        return None
+        with open(config_path, "w") as f:
+            f.write("# Longplayer configuration file\n")
 
     config_parser = configparser.ConfigParser()
     config_parser.read(config_path)

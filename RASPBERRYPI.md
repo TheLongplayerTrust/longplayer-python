@@ -40,7 +40,8 @@ Below is a list of recommended parts.
 ```sh
 # cmake and python3-dev are needed for to build libsamplerate
 # libsndfile needed to read audio file
-sudo apt install -y git cmake python3-dev libsndfile1 libportaudio2
+# libshout needed for streaming to icecast
+sudo apt install -y git cmake python3-dev libsndfile1 libportaudio2 libshout3-dev
 git clone https://github.com/TheLongplayerTrust/longplayer-python.git
 cd longplayer-python
 python3 -m venv .venv

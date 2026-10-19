@@ -1,0 +1,17 @@
+#--------------------------------------------------------------------------------
+# systemd service file for longplayer-python
+#--------------------------------------------------------------------------------
+
+[Unit]
+Description=Longplayer
+After=sound.target
+
+[Service]
+Type=simple
+User=pi
+ExecStart=/home/pi/longplayer-python/.venv/bin/python3 -m longplayer --output-device 0 -c 2
+WorkingDirectory=/home/pi/longplayer-python
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

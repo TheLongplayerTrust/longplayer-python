@@ -83,7 +83,8 @@ class Longplayer:
             self.streamer = None
             self.streamer_output_block = None
         else:
-            self.streamer = LongplayerIcecastStreamer(icecast_config=icecast_config)
+            self.streamer = LongplayerIcecastStreamer(icecast_config=icecast_config,
+                                                      block_size=buffer_size)
             self.streamer_output_block = np.zeros((buffer_size, 2))
 
         self.render_thread = threading.Thread(target=self.render_audio_loop, daemon=True)
@@ -92,6 +93,8 @@ class Longplayer:
     def audio_callback(self, outdata, num_frames, time, status):
         # Be sure to write silence to all channels beyond those rendered by Longplayer.
         # Otherwise, some backends (e.g. pulseaudio) will generate noise to unused channels.
+        if status.output_underflow:
+            logger.warning("audio_callback: Output underflow")
 
         block = self.blockbuffer.get()
         if block is not None:
@@ -111,8 +114,13 @@ class Longplayer:
         self.output_block[:] = 0.0
         if self.streamer_output_block is not None:
             self.streamer_output_block[:] = 0.0
-        if len(self.audio_players) > 0:
-            for player_index, audio_player in enumerate(self.audio_players):
+        #--------------------------------------------------------------------------------
+        # Take a reference to the current list of players. The main thread replaces
+        # the list rather than modifying it in place, so this is safe to iterate.
+        #--------------------------------------------------------------------------------
+        audio_players = self.audio_players
+        if len(audio_players) > 0:
+            for player_index, audio_player in enumerate(audio_players):
                 channel_index = player_index % 6
 
                 if self.solo is not None and self.solo != channel_index:
@@ -134,18 +142,18 @@ class Longplayer:
                 #--------------------------------------------------------------------------------
                 # For streaming output, mix down to stereo if necessary.
                 #--------------------------------------------------------------------------------
-                if self.streamer is not None:
-                    if self.num_channels == 2:
-                        #--------------------------------------------------------------------------------
-                        # Output is already in stereo, so just copy the samples across.
-                        #--------------------------------------------------------------------------------
-                        self.streamer_output_block[:] = self.output_block[:]
-                    else:
-                        self.streamer_output_block[:,0] += channel_samples * (1 - math.sqrt(channel_index / 5)) / 2
-                        self.streamer_output_block[:,1] += channel_samples * (math.sqrt(channel_index / 5)) / 2
+                if self.streamer is not None and self.num_channels != 2:
+                    self.streamer_output_block[:,0] += channel_samples * (1 - math.sqrt(channel_index / 5)) / 2
+                    self.streamer_output_block[:,1] += channel_samples * (math.sqrt(channel_index / 5)) / 2
 
         if self.streamer is not None:
-            self.streamer.push_block(self.streamer_output_block.copy())
+            if self.num_channels == 2:
+                #--------------------------------------------------------------------------------
+                # Output is already in stereo, so just send a copy of it.
+                #--------------------------------------------------------------------------------
+                self.streamer.push_block(self.output_block.copy())
+            else:
+                self.streamer.push_block(self.streamer_output_block.copy())
 
         self.output_block *= self.gain_linear
         self.blockbuffer.extend(self.output_block)
@@ -217,6 +225,7 @@ class Longplayer:
                 for audio_player in self.audio_players:
                     audio_player.fade_down()
 
+                new_audio_players = []
                 for layer_index, rate in enumerate(LAYER_RATES):
                     section_start_position, section_playhead_position = get_position_for_layer(increments, layer_index)
                     logger.debug(" - layer %d: start position %.3fs, playhead position %.3fs" % (layer_index, section_start_position, section_playhead_position))
@@ -227,13 +236,18 @@ class Longplayer:
                     player = AudioPlayer(audio_data=audio_data,
                                          initial_phase=initial_phase,
                                          rate=rate)
-                    self.audio_players.append(player)
+                    new_audio_players.append(player)
+
+                #--------------------------------------------------------------------------------
+                # Replace the list in a single assignment rather than modifying it in place,
+                # as it is concurrently read by the render thread.
+                #--------------------------------------------------------------------------------
+                self.audio_players = self.audio_players + new_audio_players
 
                 last_increments_int = increments_int
 
-            for audio_player in self.audio_players[:]:
-                if audio_player.is_finished:
-                    self.audio_players.remove(audio_player)
+            self.audio_players = [audio_player for audio_player in self.audio_players
+                                  if not audio_player.is_finished]
 
             time.sleep(0.1)
 

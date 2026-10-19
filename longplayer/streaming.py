@@ -22,6 +22,12 @@ class IcecastConfig:
 
 class LongplayerIcecastStreamer:
     def __init__(self, icecast_config: IcecastConfig = None):
+        """
+        Initialize the Longplayer Icecast streamer with the specified Icecast configuration.
+
+        Args:
+            icecast_config (IcecastConfig): Configuration for connecting to the Icecast server.
+        """
         self.config = icecast_config
         self.is_running = False
         self.is_connected = False
@@ -40,6 +46,13 @@ class LongplayerIcecastStreamer:
         logger.debug("Streamer: Initialized mp3 encoder")
 
     def step(self):
+        """
+        Process the next block of audio from the queue, encode it as mp3, and send it
+        to the Icecast server.
+
+        Raises:
+            shout.ShoutException: If there is an error sending data to the Icecast server.
+        """
         try:
             block = self.queue.get(block=False)
         except queue.Empty:
@@ -66,6 +79,10 @@ class LongplayerIcecastStreamer:
         self.client.sync()
 
     def runloop(self):
+        """
+        Main loop for the Icecast streamer. Continuously processes audio blocks and handles
+        reconnections to the Icecast server if the connection is lost.
+        """
         self.is_running = True
         try:
             self.connect()
@@ -96,6 +113,12 @@ class LongplayerIcecastStreamer:
             time.sleep(0.005)
     
     def connect(self):
+        """
+        Establish a connection to the Icecast server using the provided configuration.
+
+        Raises:
+            shout.ShoutException: If there is an error connecting to the Icecast server.
+        """
         try:
             logger.debug("Streamer: Connecting to Icecast server at %s:%d%s..." % (self.config.host, 
                                                                                   self.config.port, 
@@ -124,14 +147,26 @@ class LongplayerIcecastStreamer:
         })        
 
     def start(self):
+        """
+        Start the Icecast streamer in a separate thread.
+        """
         self.thread = threading.Thread(target=self.runloop,
                                        daemon=True)
         self.thread.start()
 
     def stop(self):
+        """
+        Stop the Icecast streamer and wait for the streaming thread to finish.
+        """
         self.is_running = False
         self.thread.join()
         logger.info("Streamer: Disconnected from Icecast server")
 
     def push_block(self, block: np.ndarray):
+        """
+        Push a block of audio data into the streaming queue.
+
+        Args:
+            block (np.ndarray): A 1-dimensional array of floating-point audio samples.
+        """
         self.queue.put(block)

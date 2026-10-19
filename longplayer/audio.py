@@ -88,14 +88,33 @@ class AudioPlayer:
     phase = property(get_phase, set_phase)
 
     def fade_up(self, duration: float = AUDIO_FADE_TIME):
+        """
+        Fade the audio amplitude up to the target level (default is 1.0) over the specified duration.
+
+        Args:
+            duration (float): The duration of the fade-up in seconds. Defaults to AUDIO_FADE_TIME.
+        """
         self.fade_to(target=1.0,
                      duration=duration)
 
     def fade_down(self, duration: float = AUDIO_FADE_TIME):
+        """
+        Fade the audio amplitude down to zero over the specified duration.
+
+        Args:
+            duration (float): The duration of the fade-down in seconds. Defaults to AUDIO_FADE_TIME.
+        """
         self.fade_to(target=0.0,
                      duration=duration)
 
     def fade_to(self, target: float, duration: float):
+        """
+        Fade the audio amplitude to the specified target level over the given duration.
+
+        Args:
+            target (float): The target amplitude level to reach.
+            duration (float): The duration of the fade in seconds.
+        """
         self.amplitude_target = target
         self.amplitude_steps_remaining = duration * SAMPLE_RATE
         self.amplitude_step = (self.amplitude_target - self.amplitude_level) / self.amplitude_steps_remaining

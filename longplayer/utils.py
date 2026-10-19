@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 def download_longplayer_audio():
+    """
+    Download the Longplayer audio file, if it doesn't already exist.
+    The audio is downloaded as a .zip file and extracted to the AUDIO_ROOT directory.
+    """
     zip_file_name = os.path.basename(AUDIO_URL)
     zip_file_path = os.path.join(AUDIO_ROOT, zip_file_name)
 
@@ -21,7 +25,14 @@ def download_longplayer_audio():
             zip_fd.extractall(AUDIO_ROOT)
 
 
-def download_file(url, local_path):
+def download_file(url: str, local_path: str):
+    """
+    Download a file from the specified URL to a local path.
+
+    Args:
+        url (str): The URL of the file to download.
+        local_path (str): The local file path where the downloaded file will be saved.
+    """
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',

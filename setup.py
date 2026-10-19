@@ -45,8 +45,8 @@ setup(
     },
     include_package_data=True,
     entry_points={
-        'longplayer': [
-            'longplayer=longplayer:__main__',
+        'console_scripts': [
+            'longplayer=longplayer.__main__:main',
         ],
     },
 )

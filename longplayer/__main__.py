@@ -11,7 +11,7 @@ import os
 logger = logging.getLogger("longplayer")
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Longplayer command-line application")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     parser.add_argument("-q", "--quiet", action="store_true", help="Quiet output")
@@ -60,3 +60,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("\nExiting Longplayer...")
         longplayer.stop()
+
+
+if __name__ == "__main__":
+    main()

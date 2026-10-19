@@ -19,6 +19,12 @@ If you're using Linux (including Raspberry Pi), you will need to install some ad
 sudo apt install -y cmake python3-dev libsndfile1 libportaudio2 libshout3-dev
 ```
 
+On macOS:
+
+```
+brew install libshout
+```
+
 To install Longplayer from the command line, for any platform, open up a terminal session and enter:
 
 ```

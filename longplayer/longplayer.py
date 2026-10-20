@@ -120,8 +120,12 @@ class Longplayer:
         #--------------------------------------------------------------------------------
         audio_players = self.audio_players
         if len(audio_players) > 0:
-            for player_index, audio_player in enumerate(audio_players):
-                channel_index = player_index % 6
+            for audio_player in audio_players:
+                #--------------------------------------------------------------------------------
+                # Use the player's own layer index rather than its position in the list,
+                # as the list shifts when finished players are removed mid-crossfade.
+                #--------------------------------------------------------------------------------
+                channel_index = audio_player.layer_index
 
                 if self.solo is not None and self.solo != channel_index:
                     continue
@@ -235,7 +239,8 @@ class Longplayer:
                     initial_phase = int(section_start_position_samples + section_playhead_position_samples)
                     player = AudioPlayer(audio_data=audio_data,
                                          initial_phase=initial_phase,
-                                         rate=rate)
+                                         rate=rate,
+                                         layer_index=layer_index)
                     new_audio_players.append(player)
 
                 #--------------------------------------------------------------------------------

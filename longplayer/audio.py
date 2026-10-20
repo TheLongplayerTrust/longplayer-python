@@ -36,7 +36,7 @@ class Resampler:
         return buffer
 
 class AudioPlayer:
-    def __init__(self, audio_data, initial_phase, rate):
+    def __init__(self, audio_data, initial_phase, rate, layer_index):
         """
         Variable speed sample player. Resamples input audio in real-time
         with linear interpolation.
@@ -45,8 +45,11 @@ class AudioPlayer:
             audio_data (list): 1D array of floating-point samples
             initial_phase (int): Initial phase in samples
             rate (float): Playback rate
+            layer_index (int): Index of the layer this player renders (0..5),
+                               which determines its output channel
         """
         self.audio_data = audio_data
+        self.layer_index = layer_index
         self._phase = initial_phase
         self.rate = rate
         self.buffer = [0]

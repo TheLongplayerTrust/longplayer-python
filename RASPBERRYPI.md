@@ -81,6 +81,7 @@ cd longplayer-oled-display
 python3 -m venv .venv
 . .venv/bin/activate
 
+sudo apt install swig liblgpio-dev
 pip3 install -r requirements.txt
 python3 display-status.py
 ```
